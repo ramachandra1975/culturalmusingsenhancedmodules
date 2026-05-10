@@ -1031,7 +1031,7 @@ function toggleChip(chip) {
   }
 }
 
-/* ── Astro prediction via Anthropic API ── */
+/* ── Astro prediction ── */
 async function generateAstro() {
   const name = document.getElementById('f-name').value.trim();
   const dob = document.getElementById('f-dob').value;
@@ -1085,7 +1085,7 @@ Format each mantra on its own line preceded by "✦ Mantra:"
 Write in an scholarly yet accessible tone. Reference Vedic scripture where appropriate.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('/api/astro', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1099,7 +1099,6 @@ Write in an scholarly yet accessible tone. Reference Vedic scripture where appro
 
     if (!text) throw new Error('Empty response');
 
-    // Render the 8 paragraphs with mantra blocks
     const lines = text.split('\n').filter(l => l.trim());
     let html = '';
     let paraCount = 0;
@@ -1127,7 +1126,7 @@ Write in an scholarly yet accessible tone. Reference Vedic scripture where appro
   btn.innerHTML = '✦ Generate Prediction + Mantras';
 }
 
-/* ── Dual Search via Anthropic API ── */
+/* ── Dual Search ── */
 async function runSearch() {
   const q = document.getElementById('search-q').value.trim();
   if (!q) return;
@@ -1163,7 +1162,7 @@ EXCERPT: <excerpt>
 ---`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('/api/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1175,7 +1174,6 @@ EXCERPT: <excerpt>
     const data = await resp.json();
     const text = data.content?.map(c => c.text || '').join('') || '';
 
-    // Parse results
     const blocks = text.split('---').filter(b => b.includes('TITLE:'));
     let html = '';
 
@@ -1211,7 +1209,6 @@ function loadEndpoints() {
     endpoints = raw ? JSON.parse(raw) : [];
   } catch { endpoints = []; }
   if (endpoints.length === 0) {
-    // Seed with default endpoints
     endpoints = [
       { url: 'omniaifreeallinoneapi.culturalmusings.com', token: 'demo-token-001', ttl: Date.now() + 3600000, status: 'green' },
       { url: 'backendsetupguide.culturalmusings.com', token: 'demo-token-002', ttl: Date.now() + 180000, status: 'amber' }
@@ -1284,7 +1281,6 @@ async function refreshEndpoint(i) {
   const ep = endpoints[i];
   addLog(`[refresh] Attempting refresh for ${ep.url}…`);
   try {
-    // Simulate refresh — in production this would POST to ep.url/refresh
     await new Promise(r => setTimeout(r, 600));
     endpoints[i].ttl = Date.now() + 3600000;
     endpoints[i].token = 'refreshed-' + Math.random().toString(36).slice(2,8);
@@ -1304,7 +1300,6 @@ async function refreshAll() {
   addLog('[refresh-all] All endpoints processed.', 'ok');
 }
 
-// Auto-refresh check every 60 seconds
 setInterval(() => {
   const now = Date.now();
   endpoints.forEach((ep, i) => {
@@ -1316,12 +1311,10 @@ setInterval(() => {
   renderTokenGrid();
 }, 60000);
 
-/* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('lt-init').textContent = new Date().toTimeString().slice(0,5);
   loadEndpoints();
   renderTokenGrid();
-  // Tick token display every 30s
   setInterval(renderTokenGrid, 30000);
 });
 </script>
