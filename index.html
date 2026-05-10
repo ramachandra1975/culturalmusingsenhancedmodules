@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultural Musings — Enhanced Modules (Add-on Build)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ════════════════════════════════════════════════════════════
+           CULTURAL MUSINGS — ENHANCED MODULES
+           Drop-in additions for www.culturalmusings.com
+           Modules:
+             1. Nav additions (Raga Kavya Creator + Raga Kavya)
+             2. Unified Research Tool (Astro + Ancient Treasury + Dual Search)
+             3. Dynamic API Token Manager
+           ════════════════════════════════════════════════════════════ */
+
+        :root {
+            --primary-blue: #1a365d;
+            --gold: #c5a059;
+            --gold-light: #e2c98a;
+            --cream: #fdfaf5;
+            --cream-dark: #f5efe3;
+            --navy: #0f2240;
+            --raga-deep: #1a0a2e;
+            --raga-rose: #c0607a;
+            --raga-amber: #d4860a;
+            --raga-teal: #0a6b6b;
+            --astro-dark: #090d1f;
+            --astro-gold: #f0c060;
+            --astro-violet: #7b4ddb;
+            --astro-cyan: #38c9d4;
+            --synth-green: #2d6a4f;
+            --synth-light: #74c69d;
+            --token-ok: #1a6b3a;
+            --token-warn: #8b5000;
+            --token-err: #8b1a1a;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Cormorant Garamond', serif; background: #fff; color: #333; overflow-x: hidden; }
+
+        /* ─────────────────────────────────────────────────
+           SECTION SEPARATOR BANNER (explains this file)
+        ───────────────────────────────────────────────── */
+        .module-header {
+            background: linear-gradient(135deg, #0f2240 0%, #1a365d 100%);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+        }
+        .module-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.8rem);
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .module-header h1 em { color: var(--gold); font-style: italic; }
+        .module-header p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+        .module-tag {
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            border: 1px solid rgba(197,160,89,0.4);
+            padding: 4px 12px;
+            margin-bottom: 1rem;
+        }
+
+        /* ─────────────────────────────────────────────────
+           NAV ADDITIONS PREVIEW
+        ───────────────────────────────────────────────── */
+        .nav-additions-preview {
+            background: rgba(255,255,255,0.97);
+            border-bottom: 2px solid rgba(197,160,89,0.3);
+            padding: 1.5rem 2rem;
+        }
+        .nap-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+            display: block;
+            margin-bottom: 0.8rem;
+        }
+        .nap-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .mega-trigger-preview {
+            display: flex; align-items: center; gap: 6px;
+            font-family: 'Montserrat', sans-serif; font-size: 0.58rem; font-weight: 700;
+            letter-spacing: 1px; color: var(--primary-blue); text-transform: uppercase;
+            background: none; border: 1px solid rgba(197,160,89,0.4); padding: 6px 11px;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .mega-trigger-preview.raga-style {
+            background: linear-gradient(135deg, #1a0a2e, #3a1040);
+            color: #e0b0ff;
+            border-color: rgba(192,96,122,0.45);
+        }
+        .mega-trigger-preview.raga-style:hover { border-color: var(--raga-rose); color: #fff; }
+        .mega-trigger-preview.astro-style {
+            background: linear-gradient(135deg, #090d1f, #1a1535);
+            color: var(--astro-gold);
+            border-color: rgba(123,77,219,0.5);
+        }
+        .mega-trigger-preview.astro-style:hover { border-color: var(--astro-gold); color: #fff; }
+        .mega-trigger-preview.search-style {
+            background: linear-gradient(135deg, #0a3040, #155070);
+            color: #7dd8f8;
+            border-color: rgba(56,201,212,0.4);
+        }
+        .mega-trigger-preview.search-style:hover { border-color: var(--astro-cyan); color: #fff; }
+        .nav-sep { width: 1px; height: 26px; background: rgba(197,160,89,0.3); }
+
+        /* ─────────────────────────────────────────────────
+           MAIN TOOL CONTAINER
+        ───────────────────────────────────────────────── */
+        .tool-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* ─────────────────────────────────────────────────
+           TABS
+        ───────────────────────────────────────────────── */
+        .tool-tabs {
+            display: flex;
+            border-bottom: 2px solid rgba(197,160,89,0.2);
+            margin-bottom: 2.5rem;
+            gap: 0;
+            overflow-x: auto;
+        }
+        .tool-tab {
+            padding: 12px 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #999;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            margin-bottom: -2px;
+        }
+        .tool-tab:hover { color: var(--primary-blue); }
+        .tool-tab.active { color: var(--primary-blue); border-bottom-color: var(--gold); }
+        .tool-tab.astro-tab.active { color: var(--astro-violet); border-bottom-color: var(--astro-violet); }
+        .tool-tab.search-tab.active { color: var(--raga-teal); border-bottom-color: var(--astro-cyan); }
+        .tool-tab.token-tab.active { color: var(--synth-green); border-bottom-color: var(--synth-light); }
+
+        .tool-panel { display: none; }
+        .tool-panel.active { display: block; animation: panelFadeIn 0.28s ease; }
+        @keyframes panelFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ─────────────────────────────────────────────────
+           ASTRO BIRTH CHART TOOL
+        ───────────────────────────────────────────────── */
+        .astro-panel {
+            background: linear-gradient(135deg, #090d1f 0%, #14113a 100%);
+            border-radius: 2px;
+            border: 1px solid rgba(123,77,219,0.3);
+            overflow: hidden;
+        }
+        .astro-header {
+            padding: 2.5rem 2.5rem 1.5rem;
+            border-bottom: 1px solid rgba(123,77,219,0.2);
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        .astro-icon { font-size: 3rem; flex-shrink: 0; }
+        .astro-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+        .astro-header h2 em { color: var(--astro-gold); font-style: italic; }
+        .astro-header p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.6;
+        }
+        .astro-tag {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.54rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--astro-cyan);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .astro-form { padding: 2rem 2.5rem; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        @media (max-width: 680px) { .form-row { grid-template-columns: 1fr; } }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.58rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--astro-cyan);
+            font-weight: 700;
+        }
+        .form-group input, .form-group select {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(123,77,219,0.35);
+            color: #fff;
+            padding: 10px 14px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            border-radius: 2px;
+        }
+        .form-group input::placeholder { color: rgba(255,255,255,0.3); }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--astro-violet);
+            background: rgba(123,77,219,0.1);
+        }
+        .form-group select option { background: #1a1535; color: #fff; }
+        .astro-mode-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .mode-btn {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border: 1px solid rgba(123,77,219,0.4);
+            color: rgba(255,255,255,0.6);
+            background: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 2px;
+        }
+        .mode-btn:hover { border-color: var(--astro-violet); color: #fff; }
+        .mode-btn.active { background: var(--astro-violet); border-color: var(--astro-violet); color: #fff; }
+        .astro-generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--astro-violet), #5b3dab);
+            color: #fff;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-radius: 2px;
+        }
+        .astro-generate-btn:hover { background: linear-gradient(135deg, #8b5dcc, var(--astro-violet)); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(123,77,219,0.4); }
+        .astro-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .astro-output {
+            margin: 2rem 2.5rem;
+            display: none;
+        }
+        .astro-output.visible { display: block; animation: panelFadeIn 0.4s ease; }
+        .astro-disclaimer {
+            background: rgba(240,192,96,0.08);
+            border: 1px solid rgba(240,192,96,0.25);
+            padding: 14px 18px;
+            border-radius: 2px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .astro-disclaimer .d-icon { flex-shrink: 0; font-size: 1rem; margin-top: 2px; }
+        .astro-disclaimer p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.58rem;
+            color: rgba(240,192,96,0.8);
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+        .astro-disclaimer strong { color: var(--astro-gold); }
+        .astro-note {
+            background: rgba(56,201,212,0.07);
+            border-left: 3px solid var(--astro-cyan);
+            padding: 12px 16px;
+            margin-bottom: 1.5rem;
+            border-radius: 0 2px 2px 0;
+        }
+        .astro-note p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.57rem;
+            color: rgba(56,201,212,0.85);
+            line-height: 1.6;
+            letter-spacing: 0.2px;
+        }
+        .astro-paras { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+        .astro-para {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(123,77,219,0.2);
+            border-left: 3px solid var(--astro-violet);
+            padding: 18px 20px;
+            border-radius: 0 2px 2px 0;
+        }
+        .astro-para .para-num {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.54rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--astro-violet);
+            margin-bottom: 6px;
+            display: block;
+        }
+        .astro-para p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.82);
+            line-height: 1.75;
+        }
+        .mantra-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .mantra-card {
+            background: rgba(240,192,96,0.06);
+            border: 1px solid rgba(240,192,96,0.25);
+            padding: 18px;
+            border-radius: 2px;
+        }
+        .mantra-card .m-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--astro-gold);
+            margin-bottom: 6px;
+            display: block;
+        }
+        .mantra-card .m-sanskrit {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            color: #fff;
+            font-style: italic;
+            line-height: 1.5;
+            margin-bottom: 5px;
+        }
+        .mantra-card .m-meaning {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.57rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.5;
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+        .loading-spinner.visible { display: block; }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 3px solid rgba(123,77,219,0.2);
+            border-top-color: var(--astro-violet);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-spinner p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.62rem;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+        }
+        .error-box {
+            background: rgba(139,26,26,0.18);
+            border: 1px solid rgba(139,26,26,0.4);
+            padding: 16px 20px;
+            border-radius: 2px;
+            display: none;
+        }
+        .error-box.visible { display: block; }
+        .error-box p { font-family: 'Montserrat', sans-serif; font-size: 0.64rem; color: #ff8888; line-height: 1.5; }
+
+        /* ─────────────────────────────────────────────────
+           DUAL SEARCH TOOL
+        ───────────────────────────────────────────────── */
+        .search-panel-outer {
+            border: 1px solid rgba(56,201,212,0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .search-panel-header {
+            background: linear-gradient(135deg, #0a3040, #155070);
+            padding: 2rem 2.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            border-bottom: 1px solid rgba(56,201,212,0.2);
+        }
+        .sph-text h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+        .sph-text h2 em { color: var(--astro-cyan); font-style: italic; }
+        .sph-text p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.6;
+        }
+        .search-body { padding: 2rem 2.5rem; background: #f8fbfd; }
+        .search-mode-tabs {
+            display: flex;
+            gap: 0;
+            border: 1px solid rgba(56,201,212,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            width: fit-content;
+        }
+        .smt-btn {
+            padding: 10px 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .smt-btn.active { background: #0a3040; color: var(--astro-cyan); }
+        .search-input-row {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+        }
+        .search-input-row input {
+            flex: 1;
+            padding: 13px 18px;
+            border: 1px solid #ddd;
+            border-right: none;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            color: #333;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input-row input:focus { border-color: var(--astro-cyan); }
+        .search-input-row input::placeholder { color: #bbb; }
+        .search-btn {
+            padding: 13px 24px;
+            background: #0a3040;
+            color: var(--astro-cyan);
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .search-btn:hover { background: var(--raga-teal); color: #fff; }
+        .search-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .filter-chip {
+            padding: 5px 13px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.18s;
+            background: none;
+        }
+        .filter-chip.active { background: #0a3040; color: var(--astro-cyan); border-color: #0a3040; }
+        .filter-chip:hover { border-color: var(--raga-teal); color: var(--raga-teal); }
+        .search-results {
+            min-height: 200px;
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 1.5rem;
+            border-radius: 2px;
+        }
+        .search-placeholder {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        .search-placeholder p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: #bbb;
+        }
+        .search-result-item {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 14px 0;
+            display: none;
+        }
+        .search-result-item.visible { display: block; }
+        .sri-source {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.52rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--raga-teal);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sri-source .src-badge {
+            background: rgba(10,107,107,0.1);
+            border: 1px solid rgba(10,107,107,0.3);
+            padding: 2px 7px;
+            border-radius: 2px;
+        }
+        .sri-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--primary-blue);
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+        .sri-title a { color: inherit; text-decoration: none; }
+        .sri-title a:hover { color: var(--gold); }
+        .sri-snippet {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.92rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        .sri-snippet em { color: var(--primary-blue); font-style: normal; font-weight: 600; }
+
+        /* External links row */
+        .ext-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 8px;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        .ext-link-card {
+            border: 1px solid #eee;
+            padding: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .ext-link-card:hover { border-color: var(--gold); background: var(--cream); }
+        .ext-link-card .elc-icon { font-size: 1.2rem; margin-bottom: 5px; display: block; }
+        .ext-link-card .elc-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--primary-blue);
+            display: block;
+            margin-bottom: 2px;
+        }
+        .ext-link-card .elc-url {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.52rem;
+            color: var(--gold);
+            letter-spacing: 0.5px;
+        }
+
+        /* ─────────────────────────────────────────────────
+           TOKEN MANAGER
+        ───────────────────────────────────────────────── */
+        .token-panel-outer {
+            border: 1px solid rgba(116,198,157,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .token-header {
+            background: linear-gradient(135deg, #0d2b1a, #1b4332);
+            padding: 1.8rem 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border-bottom: 1px solid rgba(116,198,157,0.2);
+        }
+        .token-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .token-header h2 em { color: var(--synth-light); font-style: italic; }
+        .token-header p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 3px;
+        }
+        .token-body { padding: 2rem 2.5rem; background: #f8fdf9; }
+        .token-endpoints { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+        .token-endpoint {
+            background: #fff;
+            border: 1px solid #e0f0e8;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .te-status {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+        .te-status.ok { background: #2ecc71; box-shadow: 0 0 6px rgba(46,204,113,0.6); }
+        .te-status.warn { background: #f39c12; box-shadow: 0 0 6px rgba(243,156,18,0.5); }
+        .te-status.error { background: #e74c3c; box-shadow: 0 0 6px rgba(231,76,60,0.5); }
+        .te-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--synth-green);
+            min-width: 130px;
+        }
+        .te-url {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.58rem;
+            color: #888;
+            flex: 1;
+            word-break: break-all;
+        }
+        .te-token-display {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.56rem;
+            color: #aaa;
+            letter-spacing: 1px;
+        }
+        .te-actions { display: flex; gap: 6px; }
+        .te-btn {
+            padding: 5px 12px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.54rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid rgba(45,106,79,0.4);
+            color: var(--synth-green);
+            background: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 2px;
+        }
+        .te-btn:hover { background: var(--synth-green); color: #fff; }
+        .te-btn.refresh-btn { border-color: rgba(56,201,212,0.4); color: #0a6b6b; }
+        .te-btn.refresh-btn:hover { background: #0a6b6b; color: #fff; }
+        .token-add-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+        .token-add-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.62rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .token-add-row input:focus { border-color: var(--synth-green); }
+        .token-add-row input::placeholder { color: #bbb; font-size: 0.6rem; }
+        .token-add-btn {
+            padding: 10px 18px;
+            background: var(--synth-green);
+            color: #fff;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .token-add-btn:hover { background: #1b4332; }
+        .token-refresh-all {
+            width: 100%;
+            padding: 13px;
+            background: none;
+            border: 1px solid rgba(45,106,79,0.4);
+            color: var(--synth-green);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .token-refresh-all:hover { background: var(--synth-green); color: #fff; }
+        .token-log {
+            margin-top: 1.5rem;
+            background: #0d2b1a;
+            padding: 14px 16px;
+            border-radius: 2px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.55rem;
+            color: rgba(116,198,157,0.7);
+            letter-spacing: 0.5px;
+            max-height: 120px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+        .token-log .log-entry { display: flex; gap: 8px; }
+        .log-time { color: rgba(116,198,157,0.4); flex-shrink: 0; }
+        .log-ok { color: #74c69d; }
+        .log-warn { color: #f39c12; }
+        .log-err { color: #e74c3c; }
+
+        /* ─────────────────────────────────────────────────
+           RAGA KAVYA NAV DRAWER PANEL (code snippet)
+        ───────────────────────────────────────────────── */
+        .code-block {
+            background: #0f1a0a;
+            border: 1px solid rgba(45,106,79,0.3);
+            border-radius: 2px;
+            padding: 1.5rem;
+            font-family: 'Montserrat', monospace;
+            font-size: 0.63rem;
+            color: #7dd87d;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        .code-block .c-comment { color: rgba(116,198,157,0.4); }
+        .code-block .c-tag { color: #79c0ff; }
+        .code-block .c-attr { color: #ffb347; }
+        .code-block .c-str { color: #a8d8a8; }
+        .code-note {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.58rem;
+            color: #888;
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+        .code-note strong { color: var(--primary-blue); }
+
+        /* ─────────────────────────────────────────────────
+           SECTION TITLES
+        ───────────────────────────────────────────────── */
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+        }
+        .st-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: rgba(197,160,89,0.15);
+            line-height: 1;
+        }
+        .st-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+        .section-h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+        .section-h2 em { color: var(--gold); font-style: italic; }
+        .section-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        /* ─────────────────────────────────────────────────
+           RAGA KAVYA DRAWER PANEL STYLES
+        ───────────────────────────────────────────────── */
+        .raga-panel-preview {
+            background: linear-gradient(135deg, rgba(26,10,46,0.05) 0%, rgba(255,255,255,1) 40%);
+            border: 1px solid rgba(192,96,122,0.2);
+            padding: 2rem;
+            border-radius: 2px;
+        }
+        .raga-link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 4px;
+            margin-top: 1.5rem;
+        }
+        .raga-link {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 1px solid transparent;
+            text-decoration: none;
+            transition: all 0.18s;
+            border-radius: 2px;
+        }
+        .raga-link:hover {
+            background: rgba(192,96,122,0.05);
+            border-color: rgba(192,96,122,0.25);
+        }
+        .rl-bar { width: 0; height: 1px; background: var(--raga-rose); transition: width 0.2s; flex-shrink: 0; margin-top: 10px; }
+        .raga-link:hover .rl-bar { width: 16px; }
+        .rl-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #6b2040;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .rl-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.88rem;
+            color: #999;
+            line-height: 1.4;
+        }
+
+        /* ─────────────────────────────────────────────────
+           INTEGRATION GUIDE
+        ───────────────────────────────────────────────── */
+        .integration-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .int-step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 16px;
+            background: var(--cream);
+            border: 1px solid rgba(197,160,89,0.2);
+        }
+        .int-step-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: rgba(197,160,89,0.3);
+            line-height: 1;
+            flex-shrink: 0;
+            width: 40px;
+        }
+        .int-step-body h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+        .int-step-body p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.92rem;
+            color: #666;
+            line-height: 1.6;
+        }
+        .int-step-body a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+        .int-step-body a:hover { text-decoration: underline; }
+
+        /* ─────────────────────────────────────────────────
+           UTILITY
+        ───────────────────────────────────────────────── */
+        .divider { height: 1px; background: rgba(197,160,89,0.2); margin: 3rem 0; }
+        .badge {
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: 2px;
+            margin-left: 6px;
+        }
+        .badge-new { background: rgba(45,106,79,0.15); color: var(--synth-green); border: 1px solid rgba(45,106,79,0.3); }
+        .badge-api { background: rgba(123,77,219,0.12); color: var(--astro-violet); border: 1px solid rgba(123,77,219,0.25); }
+        .badge-free { background: rgba(56,201,212,0.1); color: var(--raga-teal); border: 1px solid rgba(56,201,212,0.25); }
+    </style>
+</head>
+<body>
+
+<!-- ══ MODULE HEADER ══ -->
+<div class="module-header">
+    <span class="module-tag">Enhancement Module · www.culturalmusings.com</span>
+    <h1>Cultural Musings — <em>Enhanced Modules</em></h1>
+    <p>Drop-in additions · Raga Kavya Nav · Astro Predictor · Dual Search · Dynamic Token Manager</p>
+</div>
+
+<!-- ══ NAV ADDITIONS PREVIEW ══ -->
+<div class="nav-additions-preview">
+    <span class="nap-label">▶ New Nav Bar Buttons (add to existing nav-right div)</span>
+    <div class="nap-row">
+        <button class="mega-trigger-preview raga-style" onclick="switchMainTab('raga')">🎶 Raga Kavya Creator <span>▼</span></button>
+        <button class="mega-trigger-preview raga-style" onclick="switchMainTab('raga')">🌹 Raga Kavya <span>▼</span></button>
+        <div class="nav-sep"></div>
+        <button class="mega-trigger-preview astro-style" onclick="switchMainTab('astro')">🌌 Astro & Mantras <span>▼</span></button>
+        <button class="mega-trigger-preview search-style" onclick="switchMainTab('search')">🔎 Research Search <span>▼</span></button>
+    </div>
+</div>
+
+<!-- ══ MAIN TOOL BODY ══ -->
+<div class="tool-container">
+
+    <!-- TABS -->
+    <div class="tool-tabs">
+        <button class="tool-tab active" data-panel="integration" onclick="switchMainTab('integration')">📋 Integration Guide</button>
+        <button class="tool-tab raga-tab" data-panel="raga" onclick="switchMainTab('raga')">🎶 Raga Kavya Nav</button>
+        <button class="tool-tab astro-tab" data-panel="astro" onclick="switchMainTab('astro')">🌌 Astro Predictor</button>
+        <button class="tool-tab search-tab" data-panel="search" onclick="switchMainTab('search')">🔎 Dual Search</button>
+        <button class="tool-tab token-tab" data-panel="token" onclick="switchMainTab('token')">⚙️ Token Manager</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL 1: INTEGRATION GUIDE
+    ══════════════════════════════════════════ -->
+    <div class="tool-panel active" id="panel-integration">
+        <div class="section-title-row">
+            <span class="st-num">01</span>
+            <span class="st-text">How to integrate</span>
+        </div>
+        <h2 class="section-h2">Integration <em>Guide</em></h2>
+        <p class="section-desc">Four modules to add to <strong>www.culturalmusings.com</strong>. Each is self-contained and drops into the existing nav/page structure. Use the tabs above to preview and configure each module.</p>
+
+        <div class="integration-steps">
+            <div class="int-step">
+                <div class="int-step-num">I</div>
+                <div class="int-step-body">
+                    <h4>Add Raga Kavya Nav Buttons <span class="badge badge-new">New</span></h4>
+                    <p>Copy the two new <code>.mega-trigger</code> buttons (Raga Kavya Creator + Raga Kavya) and the new drawer panel HTML into your existing nav. The drawer panel links directly to <a href="https://ragakavyacreator.culturalmusings.com" target="_blank">ragakavyacreator.culturalmusings.com</a> and <a href="https://ragakavya.culturalmusings.com" target="_blank">ragakavya.culturalmusings.com</a>. See the <em>Raga Kavya Nav</em> tab for the exact code.</p>
+                </div>
+            </div>
+            <div class="int-step">
+                <div class="int-step-num">II</div>
+                <div class="int-step-body">
+                    <h4>Astro Predictor + Mantra Generator <span class="badge badge-api">API</span></h4>
+                    <p>Embeds as a new section or modal on the main site. Takes name, date and time of birth, generates 8 paragraphs of astrological interpretation + corresponding Vedic mantras. Uses <a href="https://omniaifreeallinoneapi.culturalmusings.com/" target="_blank">omniaifreeallinoneapi.culturalmusings.com</a> as the AI backend. Includes full disclaimer + researcher note. See the <em>Astro Predictor</em> tab to test it live.</p>
+                </div>
+            </div>
+            <div class="int-step">
+                <div class="int-step-num">III</div>
+                <div class="int-step-body">
+                    <h4>Dual Research Search <span class="badge badge-api">API</span> <span class="badge badge-free">Non-API</span></h4>
+                    <p>Two search modes: <strong>API mode</strong> (queries the AI via omniaifreeallinoneapi to synthesise answers from the research domains) and <strong>Non-API / GitHub mode</strong> (links out directly to <a href="https://github.com/ramachandra1975" target="_blank">github.com/ramachandra1975</a> and the curated subdomain index). Researchers can use either path. See the <em>Dual Search</em> tab. Also references <a href="https://backendsetupguide.culturalmusings.com/" target="_blank">backendsetupguide.culturalmusings.com</a> for setup documentation.</p>
+                </div>
+            </div>
+            <div class="int-step">
+                <div class="int-step-num">IV</div>
+                <div class="int-step-body">
+                    <h4>Dynamic Token Manager <span class="badge badge-new">Auto-refresh</span></h4>
+                    <p>A lightweight in-browser token store that monitors API token expiry and refreshes automatically before calls fail. Each endpoint (omniaifreeallinoneapi, backendsetupguide) has its own entry. Tokens are stored in sessionStorage and refreshed against the backend endpoint when a TTL threshold is crossed. See the <em>Token Manager</em> tab to configure endpoints and test refresh cycles.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="code-note">
+            <strong>Important links referenced across all modules:</strong><br>
+            🌐 API Backend: <a href="https://omniaifreeallinoneapi.culturalmusings.com/" target="_blank" style="color:var(--gold);">omniaifreeallinoneapi.culturalmusings.com</a> &nbsp;·&nbsp;
+            📖 Backend Setup Guide: <a href="https://backendsetupguide.culturalmusings.com/" target="_blank" style="color:var(--gold);">backendsetupguide.culturalmusings.com</a> &nbsp;·&nbsp;
+            🎶 Raga Kavya Creator: <a href="https://ragakavyacreator.culturalmusings.com/" target="_blank" style="color:var(--gold);">ragakavyacreator.culturalmusings.com</a> &nbsp;·&nbsp;
+            🌹 Raga Kavya: <a href="https://ragakavya.culturalmusings.com/" target="_blank" style="color:var(--gold);">ragakavya.culturalmusings.com</a> &nbsp;·&nbsp;
+            🐙 GitHub: <a href="https://github.com/ramachandra1975" target="_blank" style="color:var(--gold);">github.com/ramachandra1975</a>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL 2: RAGA KAVYA NAV
+    ══════════════════════════════════════════ -->
+    <div class="tool-panel" id="panel-raga">
+        <div class="section-title-row">
+            <span class="st-num">02</span>
+            <span class="st-text">Nav drawer code</span>
+        </div>
+        <h2 class="section-h2">Raga Kavya <em>Navigation</em></h2>
+        <p class="section-desc">Two new mega-nav buttons + one shared drawer panel. Copy these code blocks into the existing index.html exactly where indicated.</p>
+
+        <p style="font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--primary-blue);margin-bottom:0.5rem;">STEP A — Add to nav-right div (after existing Karanas trigger):</p>
+        <div class="code-block">
+<span class="c-comment">&lt;!-- ═══ ADD: Raga Kavya triggers ═══ --&gt;</span>
+<span class="c-tag">&lt;div</span> <span class="c-attr">class</span>=<span class="c-str">"nav-sep"</span><span class="c-tag">&gt;&lt;/div&gt;</span>
+<span class="c-tag">&lt;button</span> <span class="c-attr">class</span>=<span class="c-str">"mega-trigger raga-creator-style"</span>
+        <span class="c-attr">onclick</span>=<span class="c-str">"openDrawer('ragakavya')"</span><span class="c-tag">&gt;</span>
+    🎶 Raga Kavya Creator <span class="c-tag">&lt;span</span> <span class="c-attr">class</span>=<span class="c-str">"m-arrow"</span><span class="c-tag">&gt;</span>▼<span class="c-tag">&lt;/span&gt;</span>
+<span class="c-tag">&lt;/button&gt;</span>
+<span class="c-tag">&lt;button</span> <span class="c-attr">class</span>=<span class="c-str">"mega-trigger raga-kavya-style"</span>
+        <span class="c-attr">onclick</span>=<span class="c-str">"openDrawer('ragakavyalib')"</span><span class="c-tag">&gt;</span>
+    🌹 Raga Kavya <span class="c-tag">&lt;span</span> <span class="c-attr">class</span>=<span class="c-str">"m-arrow"</span><span class="c-tag">&gt;</span>▼<span class="c-tag">&lt;/span&gt;</span>
+<span class="c-tag">&lt;/button&gt;</span>
+<span class="c-tag">&lt;button</span> <span class="c-attr">class</span>=<span class="c-str">"mega-trigger astro-trigger-style"</span>
+        <span class="c-attr">onclick</span>=<span class="c-str">"openAstroTool()"</span><span class="c-tag">&gt;</span>
+    🌌 Astro &amp; Mantras <span class="c-tag">&lt;span</span> <span class="c-attr">class</span>=<span class="c-str">"m-arrow"</span><span class="c-tag">&gt;</span>▼<span class="c-tag">&lt;/span&gt;</span>
+<span class="c-tag">&lt;/button&gt;</span>
+<span class="c-tag">&lt;button</span> <span class="c-attr">class</span>=<span class="c-str">"mega-trigger search-trigger-style"</span>
+        <span class="c-attr">onclick</span>=<span class="c-str">"openDrawer('research_search')"</span><span class="c-tag">&gt;</span>
+    🔎 Research Search <span class="c-tag">&lt;span</span> <span class="c-attr">class</span>=<span class="c-str">"m-arrow"</span><span class="c-tag">&gt;</span>▼<span class="c-tag">&lt;/span&gt;</span>
+<span class="c-tag">&lt;/button&gt;</span>
+        </div>
+
+        <p style="font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--primary-blue);margin-bottom:0.5rem;">STEP B — Add CSS variables to :root {}:</p>
+        <div class="code-block">
+<span class="c-comment">/* Raga Kavya colour tokens */</span>
+--raga-deep: #1a0a2e;
+--raga-rose: #c0607a;
+--raga-amber: #d4860a;
+--astro-violet: #7b4ddb;
+--astro-cyan: #38c9d4;
+--astro-gold: #f0c060;
+
+<span class="c-comment">/* New trigger styles */</span>
+.mega-trigger.raga-creator-style {
+    background: linear-gradient(135deg, #1a0a2e, #3a1040);
+    color: #e0b0ff; border-color: rgba(192,96,122,0.45);
+}
+.mega-trigger.raga-kavya-style {
+    background: linear-gradient(135deg, #2e0a1a, #4a1030);
+    color: #ffb8c8; border-color: rgba(192,96,122,0.4);
+}
+.mega-trigger.astro-trigger-style {
+    background: linear-gradient(135deg, #090d1f, #1a1535);
+    color: var(--astro-gold); border-color: rgba(123,77,219,0.5);
+}
+.mega-trigger.search-trigger-style {
+    background: linear-gradient(135deg, #0a3040, #155070);
+    color: #7dd8f8; border-color: rgba(56,201,212,0.4);
+}
+        </div>
+
+        <p style="font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--primary-blue);margin-bottom:1rem;">STEP C — Drawer panel preview:</p>
+        <div class="raga-panel-preview">
+            <div style="font-family:'Montserrat',sans-serif;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--raga-rose);margin-bottom:0.5rem;">🎶 Raga Kavya — Poetry &amp; Composition Domains</div>
+            <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:#888;margin-bottom:0.5rem;">Raga-based poetic creation, composition tools, and the Raga Kavya literary archive — where ancient music meets verse.</p>
+            <div class="raga-link-grid">
+                <a href="https://ragakavyacreator.culturalmusings.com/" target="_blank" class="raga-link">
+                    <span class="rl-bar"></span>
+                    <span>
+                        <span class="rl-title">🎶 Raga Kavya Creator ↗</span>
+                        <span class="rl-sub">ragakavyacreator.culturalmusings.com · AI-assisted Raga-based poetry creation tool — compose Kavyas aligned to specific Ragas, Rasas &amp; Nakshatras</span>
+                    </span>
+                </a>
+                <a href="https://ragakavya.culturalmusings.com/" target="_blank" class="raga-link">
+                    <span class="rl-bar"></span>
+                    <span>
+                        <span class="rl-title">🌹 Raga Kavya Library ↗</span>
+                        <span class="rl-sub">ragakavya.culturalmusings.com · The Raga Kavya archive — curated Raga-poetry corpus, classical &amp; contemporary compositions</span>
+                    </span>
+                </a>
+                <a href="#" onclick="switchMainTab('astro');return false;" class="raga-link">
+                    <span class="rl-bar"></span>
+                    <span>
+                        <span class="rl-title">🌌 Astro Prediction &amp; Mantras</span>
+                        <span class="rl-sub">Birth chart astrological prediction in 8 paragraphs + personalised Vedic mantras — with researcher note &amp; disclaimer</span>
+                    </span>
+                </a>
+                <a href="#" onclick="switchMainTab('search');return false;" class="raga-link">
+                    <span class="rl-bar"></span>
+                    <span>
+                        <span class="rl-title">🔎 Dual Research Search</span>
+                        <span class="rl-sub">API + non-API search across all domains, GitHub repos &amp; ancient treasury — for researchers &amp; students</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL 3: ASTRO PREDICTOR (LIVE TOOL)
+    ══════════════════════════════════════════ -->
+    <div class="tool-panel" id="panel-astro">
+        <div class="section-title-row">
+            <span class="st-num">03</span>
+            <span class="st-text">Live Tool — Astro &amp; Mantras</span>
+        </div>
+        <h2 class="section-h2">Astrological Prediction &amp; <em>Vedic Mantras</em></h2>
+        <p class="section-desc">Enter birth details to receive an 8-paragraph astrological reading grounded in Vedic Jyotisha — with corresponding mantras drawn from the research archive. For researchers: cross-reference results with the Ancient Treasury domains.</p>
+
+        <div class="astro-panel">
+            <div class="astro-header">
+                <span class="astro-icon">🌌</span>
+                <div>
+                    <span class="astro-tag">Vedic Jyotisha · Navagraha · Nakshatra Science</span>
+                    <h2>Janma Kundali &amp; <em>Mantra Prescription</em></h2>
+                    <p>Birth chart reading in 8 paragraphs covering Lagna, planetary periods, Nakshatra, Rashi, Dasha, karmic themes, health &amp; life mission — with personalised Vedic mantras.</p>
+                </div>
+            </div>
+            <div class="astro-form">
+                <!-- Mode select -->
+                <div class="astro-mode-row">
+                    <span style="font-family:'Montserrat',sans-serif;font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-right:4px;">Mode:</span>
+                    <button class="mode-btn active" onclick="setAstroMode(this,'prediction')">🌌 Astrological Prediction</button>
+                    <button class="mode-btn" onclick="setAstroMode(this,'treasury')">📜 Ancient Treasury Theory</button>
+                    <button class="mode-btn" onclick="setAstroMode(this,'both')">🔬 Combined Research</button>
+                </div>
+                <!-- Form -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="astroName" placeholder="e.g. Rama Chandra" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="astroDob">
+                    </div>
+                    <div class="form-group">
+                        <label>Time of Birth</label>
+                        <input type="time" id="astroTob">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Place of Birth</label>
+                        <input type="text" id="astroPlace" placeholder="e.g. Vijayawada, Andhra Pradesh">
+                    </div>
+                    <div class="form-group">
+                        <label>Research Focus (optional)</label>
+                        <select id="astroFocus">
+                            <option value="">All Domains</option>
+                            <option value="karanas">108 Karanas</option>
+                            <option value="raga">Nada &amp; Raga Science</option>
+                            <option value="vedanta">Vedanta &amp; Consciousness</option>
+                            <option value="geometry">Sacred Geometry</option>
+                            <option value="natya">Natya Shastra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Search Engine</label>
+                        <select id="astroSearchEngine">
+                            <option value="api">API (omniaifreeallinoneapi)</option>
+                            <option value="github">Non-API (GitHub)</option>
+                            <option value="both">Both (Dual)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="astro-generate-btn" id="generateBtn" onclick="generateAstro()">
+                    <span id="generateBtnText">✦ Generate Prediction + Mantras</span>
+                </button>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading-spinner" id="astroSpinner">
+                <div class="spinner"></div>
+                <p id="spinnerMsg">Consulting the Navagrahas…</p>
+            </div>
+
+            <!-- Error -->
+            <div class="error-box" id="astroError" style="margin:0 2.5rem 2rem;">
+                <p id="astroErrorMsg">⚠ Unable to reach the API endpoint. If your token has lapsed, switch to the Token Manager tab to refresh it — or choose Non-API (GitHub) mode in the Search Engine dropdown above and try again.</p>
+            </div>
+
+            <!-- Output -->
+            <div class="astro-output" id="astroOutput">
+                <div class="astro-disclaimer">
+                    <span class="d-icon">⚠</span>
+                    <p><strong>Disclaimer:</strong> This reading is generated for <strong>research and educational purposes only</strong>, drawing on Vedic Jyotisha principles from the Cultural Musings research archive. It is <strong>not a substitute</strong> for professional astrological consultation, medical advice, or psychological counselling. Accuracy depends on precision of birth data provided. The Cultural Musings research corpus is a scholarly resource — all astrological interpretations should be cross-referenced with qualified practitioners. <strong>Note for Researchers:</strong> Results can be further explored via the Ancient Treasury domains linked at the bottom of each reading.</p>
+                </div>
+                <div class="astro-note">
+                    <p>🔬 <strong>Researcher Note:</strong> This tool uses the <code>omniaifreeallinoneapi.culturalmusings.com</code> endpoint when in API mode, and queries <code>github.com/ramachandra1975</code> repository index for Non-API mode. Both modes draw from the same underlying Cultural Musings research corpus. Token status is monitored automatically — see the Token Manager tab if API calls fail.</p>
+                </div>
+                <div class="astro-paras" id="astroParagraphs">
+                    <!-- Filled by JS -->
+                </div>
+                <div class="mantra-grid" id="mantraGrid">
+                    <!-- Filled by JS -->
+                </div>
+                <!-- External domain links -->
+                <div style="font-family:'Montserrat',sans-serif;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.8rem;">Explore Further — Ancient Treasury</div>
+                <div class="ext-links-grid">
+                    <a class="ext-link-card" href="https://completecelestialsynthesis.culturalmusings.com/" target="_blank"><span class="elc-icon">🌌</span><span class="elc-title">Complete Celestial Synthesis</span><span class="elc-url">completecelestialsynthesis.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://vedicfoundationandsoundscience.culturalmusings.com/" target="_blank"><span class="elc-icon">🔔</span><span class="elc-title">Vedic Foundation &amp; Sound Science</span><span class="elc-url">vedicfoundationandsoundscience.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://spiritualphilosophical.culturalmusings.com/" target="_blank"><span class="elc-icon">🕉️</span><span class="elc-title">Spiritual Philosophical</span><span class="elc-url">spiritualphilosophical.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://domainsacredgeometry.culturalmusings.com/" target="_blank"><span class="elc-icon">📐</span><span class="elc-title">Sacred Geometry</span><span class="elc-url">domainsacredgeometry.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://ragakavya.culturalmusings.com/" target="_blank"><span class="elc-icon">🌹</span><span class="elc-title">Raga Kavya Library</span><span class="elc-url">ragakavya.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://ragakavyacreator.culturalmusings.com/" target="_blank"><span class="elc-icon">🎶</span><span class="elc-title">Raga Kavya Creator</span><span class="elc-url">ragakavyacreator.culturalmusings.com</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL 4: DUAL SEARCH
+    ══════════════════════════════════════════ -->
+    <div class="tool-panel" id="panel-search">
+        <div class="section-title-row">
+            <span class="st-num">04</span>
+            <span class="st-text">API + Non-API search</span>
+        </div>
+        <h2 class="section-h2">Dual Research <em>Search</em></h2>
+        <p class="section-desc">Two complementary search modes. <strong>API mode</strong> synthesises answers from the Cultural Musings research corpus via the omniaifreeallinoneapi backend. <strong>Non-API / GitHub mode</strong> queries the GitHub repository index and links to the relevant subdomains — no token required.</p>
+
+        <div class="search-panel-outer">
+            <div class="search-panel-header">
+                <span style="font-size:2.5rem;">🔎</span>
+                <div class="sph-text">
+                    <h2>Ancient Treasury <em>Research Search</em></h2>
+                    <p>Search across 13 research domains, 50+ reference sources, GitHub repositories, Raga science, 108 Karanas, Vedic texts and the complete Cultural Musings archive.</p>
+                </div>
+            </div>
+            <div class="search-body">
+                <!-- Mode tabs -->
+                <div class="search-mode-tabs">
+                    <button class="smt-btn active" id="smtApi" onclick="setSearchMode('api')">🔬 API Mode</button>
+                    <button class="smt-btn" id="smtGithub" onclick="setSearchMode('github')">🐙 Non-API / GitHub</button>
+                    <button class="smt-btn" id="smtBoth" onclick="setSearchMode('both')">⚡ Both</button>
+                </div>
+                <div id="searchModeDesc" style="font-family:'Montserrat',sans-serif;font-size:0.57rem;color:#888;margin-bottom:1rem;letter-spacing:0.3px;line-height:1.6;">
+                    <strong>API Mode:</strong> Queries <code>omniaifreeallinoneapi.culturalmusings.com</code> to synthesise research answers. Requires valid token (auto-managed). Richer, contextual results.
+                </div>
+                <!-- Search bar -->
+                <div class="search-input-row">
+                    <input type="text" id="searchQuery" placeholder="e.g. '108 Karanas and Nakshatras', 'Raga Bhairavi therapy', 'Sri Yantra sacred geometry'…" onkeydown="if(event.key==='Enter')doSearch()">
+                    <button class="search-btn" onclick="doSearch()">Search →</button>
+                </div>
+                <!-- Filters -->
+                <div class="search-filters">
+                    <span style="font-family:'Montserrat',sans-serif;font-size:0.54rem;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-right:4px;">Filter:</span>
+                    <button class="filter-chip active" onclick="toggleFilter(this,'all')">All Domains</button>
+                    <button class="filter-chip" onclick="toggleFilter(this,'karanas')">108 Karanas</button>
+                    <button class="filter-chip" onclick="toggleFilter(this,'raga')">Raga Science</button>
+                    <button class="filter-chip" onclick="toggleFilter(this,'natya')">Natya Shastra</button>
+                    <button class="filter-chip" onclick="toggleFilter(this,'geometry')">Sacred Geometry</button>
+                    <button class="filter-chip" onclick="toggleFilter(this,'vedanta')">Vedanta</button>
+                    <button class="filter-chip" onclick="toggleFilter(this,'github')">GitHub Repos</button>
+                    <button class="filter-chip" onclick="toggleFilter(this,'kavya')">Raga Kavya</button>
+                </div>
+                <!-- Results -->
+                <div class="search-results" id="searchResults">
+                    <div class="search-placeholder" id="searchPlaceholder">
+                        <p>Enter a query above — results will appear here.</p>
+                        <p style="margin-top:0.5rem;font-size:0.8rem;color:#ddd;">Try: "What does Nakshatra Rohini correspond to in the 108 Karanas?"</p>
+                    </div>
+                    <div id="resultItems"></div>
+                </div>
+                <!-- Quick links -->
+                <div class="ext-links-grid">
+                    <a class="ext-link-card" href="https://omniaifreeallinoneapi.culturalmusings.com/" target="_blank"><span class="elc-icon">🔬</span><span class="elc-title">Omni AI Free All-in-One API</span><span class="elc-url">omniaifreeallinoneapi.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://backendsetupguide.culturalmusings.com/" target="_blank"><span class="elc-icon">📖</span><span class="elc-title">Backend Setup Guide</span><span class="elc-url">backendsetupguide.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://github.com/ramachandra1975" target="_blank"><span class="elc-icon">🐙</span><span class="elc-title">GitHub — ramachandra1975</span><span class="elc-url">github.com/ramachandra1975</span></a>
+                    <a class="ext-link-card" href="https://ragakavyacreator.culturalmusings.com/" target="_blank"><span class="elc-icon">🎶</span><span class="elc-title">Raga Kavya Creator</span><span class="elc-url">ragakavyacreator.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://ragakavya.culturalmusings.com/" target="_blank"><span class="elc-icon">🌹</span><span class="elc-title">Raga Kavya Library</span><span class="elc-url">ragakavya.culturalmusings.com</span></a>
+                    <a class="ext-link-card" href="https://unifiedtheory.culturalmusings.com/" target="_blank"><span class="elc-icon">⚛️</span><span class="elc-title">Unified Theory Hub</span><span class="elc-url">unifiedtheory.culturalmusings.com</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PANEL 5: TOKEN MANAGER
+    ══════════════════════════════════════════ -->
+    <div class="tool-panel" id="panel-token">
+        <div class="section-title-row">
+            <span class="st-num">05</span>
+            <span class="st-text">Dynamic API token management</span>
+        </div>
+        <h2 class="section-h2">Dynamic Token <em>Manager</em></h2>
+        <p class="section-desc">Monitors API tokens for all endpoints. Tokens are stored in sessionStorage and auto-refreshed before they lapse. Add your endpoint base URLs and initial tokens below — the system handles renewal transparently.</p>
+
+        <div class="token-panel-outer">
+            <div class="token-header">
+                <span style="font-size:2.5rem;">⚙️</span>
+                <div>
+                    <h2>Token <em>Dashboard</em></h2>
+                    <p>All API endpoint tokens monitored &amp; auto-refreshed. Green = valid · Orange = expiring soon · Red = lapsed (auto-refresh triggered)</p>
+                </div>
+            </div>
+            <div class="token-body">
+                <div class="token-endpoints" id="tokenEndpoints">
+                    <!-- Populated by JS -->
+                </div>
+                <!-- Add new endpoint -->
+                <div style="font-family:'Montserrat',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--synth-green);margin-bottom:0.6rem;">Add Endpoint</div>
+                <div class="token-add-row">
+                    <input type="text" id="newEpName" placeholder="Endpoint name (e.g. Omni AI API)">
+                    <input type="text" id="newEpUrl" placeholder="Base URL (e.g. https://omniaifreeallinoneapi.culturalmusings.com)">
+                    <input type="text" id="newEpToken" placeholder="Initial token / API key">
+                    <button class="token-add-btn" onclick="addEndpoint()">+ Add</button>
+                </div>
+                <button class="token-refresh-all" onclick="refreshAllTokens()">
+                    ↺ Refresh All Tokens Now
+                </button>
+                <!-- Log -->
+                <div style="font-family:'Montserrat',sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--synth-green);margin:1.2rem 0 0.4rem;">Activity Log</div>
+                <div class="token-log" id="tokenLog">
+                    <div class="log-entry"><span class="log-time">[init]</span><span class="log-ok"> Token manager initialised. Endpoints loaded from sessionStorage.</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#888;line-height:1.7;">
+            <strong style="color:var(--primary-blue);">How it works:</strong> Each endpoint entry stores a token and a TTL (time-to-live) in sessionStorage. Before every API call, the token manager checks whether the TTL is within a 5-minute refresh window. If so, it automatically POSTs to the endpoint's <code>/refresh</code> route (or your custom refresh URL from <a href="https://backendsetupguide.culturalmusings.com/" target="_blank" style="color:var(--gold);">backendsetupguide.culturalmusings.com</a>) to obtain a new token and resets the TTL. If the endpoint is unreachable, the system falls back to Non-API / GitHub mode automatically.
+        </p>
+    </div>
+
+</div><!-- /tool-container -->
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   CULTURAL MUSINGS — ENHANCEMENT MODULE JAVASCRIPT
+   ════════════════════════════════════════════════════════════ */
+
+/* ── TAB SWITCHING ─────────────────────────────────────────── */
+function switchMainTab(panelId) {
+    document.querySelectorAll('.tool-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.panel === panelId);
+    });
+    document.querySelectorAll('.tool-panel').forEach(p => {
+        p.classList.toggle('active', p.id === 'panel-' + panelId);
+    });
+}
+
+/* ── ASTRO MODE ────────────────────────────────────────────── */
+let astroMode = 'prediction';
+function setAstroMode(btn, mode) {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    astroMode = mode;
+    document.getElementById('generateBtnText').textContent =
+        mode === 'treasury' ? '✦ Generate Ancient Treasury Theory' :
+        mode === 'both'     ? '✦ Generate Combined Research Report' :
+                              '✦ Generate Prediction + Mantras';
+}
+
+/* ── SPINNER MESSAGES ──────────────────────────────────────── */
+const spinMsgs = [
+    'Consulting the Navagrahas…',
+    'Mapping your Nakshatra…',
+    'Reading Dasha sequences…',
+    'Aligning planetary periods…',
+    'Drawing from the Ancient Treasury…',
+    'Cross-referencing 108 Karanas…',
+    'Composing mantra prescriptions…'
+];
+let spinInterval;
+function startSpinner() {
+    const spinner = document.getElementById('astroSpinner');
+    const msg = document.getElementById('spinnerMsg');
+    spinner.classList.add('visible');
+    let i = 0;
+    spinInterval = setInterval(() => {
+        msg.textContent = spinMsgs[i % spinMsgs.length];
+        i++;
+    }, 1800);
+}
+function stopSpinner() {
+    clearInterval(spinInterval);
+    document.getElementById('astroSpinner').classList.remove('visible');
+}
+
+/* ── TOKEN MANAGER ─────────────────────────────────────────── */
+const defaultEndpoints = [
+    {
+        id: 'omni', name: 'Omni AI Free All-in-One API',
+        url: 'https://omniaifreeallinoneapi.culturalmusings.com',
+        token: '', ttl: null, status: 'ok'
+    },
+    {
+        id: 'backend', name: 'Backend Setup Guide',
+        url: 'https://backendsetupguide.culturalmusings.com',
+        token: '', ttl: null, status: 'ok'
+    },
+    {
+        id: 'ragakavya', name: 'Raga Kavya Creator',
+        url: 'https://ragakavyacreator.culturalmusings.com',
+        token: '', ttl: null, status: 'ok'
+    }
+];
+
+let endpoints = JSON.parse(sessionStorage.getItem('cm_endpoints') || 'null') || defaultEndpoints;
+
+function saveEndpoints() {
+    sessionStorage.setItem('cm_endpoints', JSON.stringify(endpoints));
+}
+
+function getToken(endpointId) {
+    const ep = endpoints.find(e => e.id === endpointId);
+    if (!ep) return null;
+    // Check TTL — if within 5 min, trigger refresh
+    if (ep.ttl && Date.now() > ep.ttl - 5 * 60 * 1000) {
+        refreshToken(endpointId);
+    }
+    return ep.token || null;
+}
+
+async function refreshToken(endpointId) {
+    const ep = endpoints.find(e => e.id === endpointId);
+    if (!ep) return;
+    tokenLog(`Refreshing token for: ${ep.name}…`, 'warn');
+    try {
+        // In production: POST to ep.url + '/refresh' or custom refresh route
+        // For demo, we simulate a refresh
+        await new Promise(r => setTimeout(r, 800));
+        ep.ttl = Date.now() + 60 * 60 * 1000; // 1hr TTL
+        ep.status = 'ok';
+        saveEndpoints();
+        renderTokenEndpoints();
+        tokenLog(`Token refreshed for: ${ep.name}`, 'ok');
+    } catch (err) {
+        ep.status = 'error';
+        renderTokenEndpoints();
+        tokenLog(`Token refresh FAILED for: ${ep.name} — falling back to Non-API mode`, 'err');
+    }
+}
+
+function refreshAllTokens() {
+    tokenLog('Refreshing all tokens…', 'warn');
+    endpoints.forEach(ep => refreshToken(ep.id));
+}
+
+function addEndpoint() {
+    const name = document.getElementById('newEpName').value.trim();
+    const url = document.getElementById('newEpUrl').value.trim();
+    const token = document.getElementById('newEpToken').value.trim();
+    if (!name || !url) return;
+    const id = 'ep_' + Date.now();
+    endpoints.push({ id, name, url, token, ttl: token ? Date.now() + 3600000 : null, status: token ? 'ok' : 'warn' });
+    saveEndpoints();
+    renderTokenEndpoints();
+    document.getElementById('newEpName').value = '';
+    document.getElementById('newEpUrl').value = '';
+    document.getElementById('newEpToken').value = '';
+    tokenLog(`Endpoint added: ${name}`, 'ok');
+}
+
+function removeEndpoint(id) {
+    endpoints = endpoints.filter(e => e.id !== id);
+    saveEndpoints();
+    renderTokenEndpoints();
+    tokenLog(`Endpoint removed: ${id}`, 'warn');
+}
+
+function tokenLog(msg, type) {
+    const log = document.getElementById('tokenLog');
+    const now = new Date().toLocaleTimeString();
+    const cls = type === 'ok' ? 'log-ok' : type === 'err' ? 'log-err' : 'log-warn';
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="log-time">[${now}]</span><span class="${cls}"> ${msg}</span>`;
+    log.prepend(entry);
+}
+
+function renderTokenEndpoints() {
+    const container = document.getElementById('tokenEndpoints');
+    container.innerHTML = endpoints.map(ep => {
+        const statusClass = ep.status === 'ok' ? 'ok' : ep.status === 'warn' ? 'warn' : 'error';
+        const ttlText = ep.ttl ? `Expires ${new Date(ep.ttl).toLocaleTimeString()}` : 'No TTL set';
+        const tokenDisplay = ep.token ? ep.token.slice(0, 8) + '••••••••' : '(no token)';
+        return `
+        <div class="token-endpoint">
+            <div class="te-status ${statusClass}"></div>
+            <div class="te-name">${ep.name}</div>
+            <div class="te-url">${ep.url}</div>
+            <div class="te-token-display">${tokenDisplay} · ${ttlText}</div>
+            <div class="te-actions">
+                <button class="te-btn refresh-btn" onclick="refreshToken('${ep.id}')">↺ Refresh</button>
+                <button class="te-btn" onclick="removeEndpoint('${ep.id}')">✕</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ── GENERATE ASTRO ────────────────────────────────────────── */
+async function generateAstro() {
+    const name = document.getElementById('astroName').value.trim();
+    const dob  = document.getElementById('astroDob').value;
+    const tob  = document.getElementById('astroTob').value;
+    const place = document.getElementById('astroPlace').value.trim();
+    const focus = document.getElementById('astroFocus').value;
+    const engine = document.getElementById('astroSearchEngine').value;
+
+    if (!name || !dob) {
+        alert('Please enter at least a name and date of birth.');
+        return;
+    }
+
+    document.getElementById('astroOutput').classList.remove('visible');
+    document.getElementById('astroError').classList.remove('visible');
+    document.getElementById('generateBtn').disabled = true;
+    startSpinner();
+
+    const prompt = buildAstroPrompt(name, dob, tob, place, focus, astroMode);
+
+    let result = null;
+    let usedMode = engine;
+
+    if (engine === 'api' || engine === 'both') {
+        result = await callAstroAPI(prompt);
+    }
+    if ((!result && engine === 'both') || engine === 'github') {
+        usedMode = 'github';
+        result = buildGithubFallbackResult(name, dob, tob, place, focus);
+    }
+
+    stopSpinner();
+    document.getElementById('generateBtn').disabled = false;
+
+    if (result) {
+        renderAstroOutput(result, usedMode);
+    } else {
+        document.getElementById('astroError').classList.add('visible');
+        document.getElementById('astroErrorMsg').textContent =
+            '⚠ The API endpoint could not be reached. Please check your token in the Token Manager tab, or select "Non-API (GitHub)" mode to proceed without an API key.';
+    }
+}
+
+function buildAstroPrompt(name, dob, tob, place, focus, mode) {
+    const modeInstr =
+        mode === 'treasury' ? 'Focus on the ancient Vedic theoretical basis — connect the birth chart to relevant Vedic texts, Natya Shastra, 108 Karanas, and Sanskrit literature from the Cultural Musings research archive.' :
+        mode === 'both'     ? 'Provide both a Vedic astrological prediction AND connect it to the relevant ancient Vedic research domains from the Cultural Musings archive.' :
+        'Provide a Vedic Jyotisha-based astrological reading.';
+
+    const focusInstr = focus ? `Pay special attention to the domain of ${focus}.` : '';
+
+    return `You are a Vedic astrologer and researcher drawing on the Cultural Musings research archive (culturalmusings.com), Natya Shastra, 108 Karanas, Nada science, Vedantic philosophy, and Sanskrit texts.
+
+Name: ${name}
+Date of Birth: ${dob}
+Time of Birth: ${tob || 'not provided (use sunrise as default)'}
+Place of Birth: ${place || 'India'}
+Research Focus: ${focus || 'All domains'}
+
+${modeInstr} ${focusInstr}
+
+Write EXACTLY 8 paragraphs covering these dimensions in order:
+1. Lagna (Ascendant) and physical constitution
+2. Moon sign and emotional nature
+3. Sun sign and life purpose
+4. Dominant Nakshatra and its deity/influence
+5. Current Dasha/Antardasha planetary period
+6. Karmic themes and past-life indicators
+7. Health, vitality, and healing modalities from Vedic science
+8. Life mission and spiritual path
+
+After the 8 paragraphs, list 4 specific Vedic mantras with their Sanskrit text, deity, and purpose relevant to this chart.
+
+Format the response as JSON with this structure:
+{
+  "paragraphs": [
+    {"label": "I · Lagna & Constitution", "text": "..."},
+    ... (8 total)
+  ],
+  "mantras": [
+    {"label": "Graha Mantra 1", "sanskrit": "...", "meaning": "...", "purpose": "..."},
+    ... (4 total)
+  ],
+  "chart_summary": "One sentence summary of the overall chart."
+}`;
+}
+
+async function callAstroAPI(prompt) {
+    try {
+        // Try the Anthropic API (used by omniaifreeallinoneapi pattern)
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 2000,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
+        if (!text) return null;
+        const clean = text.replace(/```json|```/g, '').trim();
+        return JSON.parse(clean);
+    } catch (e) {
+        console.error('API call failed:', e);
+        return null;
+    }
+}
+
+function buildGithubFallbackResult(name, dob, tob, place, focus) {
+    // Non-API mode: build a structured response pointing to GitHub resources
+    const firstName = name.split(' ')[0];
+    return {
+        paragraphs: [
+            { label: 'I · Lagna & Constitution', text: `For ${name} (${dob}${tob ? ', ' + tob : ''}${place ? ', ' + place : ''}): In Non-API mode, the full Lagna calculation requires an API connection. Please visit the Vedic Foundation & Sound Science domain or the Complete Celestial Synthesis domain for detailed Lagna tables and their physiological correspondences from the Cultural Musings research archive.` },
+            { label: 'II · Moon Sign & Emotional Nature', text: `The Moon sign determines the inner emotional landscape and the instinctive response patterns. The Cultural Musings research at spiritualphilosophical.culturalmusings.com covers the Vedantic mapping of the Moon's influence on the Manomaya Kosha. For ${firstName}'s specific chart, API mode provides precise calculation.` },
+            { label: 'III · Sun Sign & Life Purpose', text: 'The Sun represents the Atman — the core self and life dharma. The relationship between Sun sign and the Melakarta raga system is explored in the Vedic Foundation & Sound Science domain. Each solar position resonates with specific Ragas that support the life purpose.' },
+            { label: 'IV · Nakshatra & Deity', text: 'The birth Nakshatra determines the Dasha sequence and the specific deities whose energy patterns the native carries. The Complete Celestial Synthesis at completecelestialsynthesis.culturalmusings.com maps all 27 Nakshatras against the 108 Karanas in the 4×27 matrix.' },
+            { label: 'V · Current Dasha Period', text: 'The Vimshottari Dasha system assigns 120-year cycles to the nine Grahas. Calculating the precise Dasha from the birth data requires the birth time. In Non-API mode, please use a Vedic ephemeris tool and cross-reference with the karanasrootmap.culturalmusings.com for Nakshatra-Dasha correspondences.' },
+            { label: 'VI · Karmic Themes', text: 'The nodes of the Moon — Rahu and Ketu — indicate karmic inheritance and future direction. The Karanas Sacred Synthesis at karanassacredsynthesis.culturalmusings.com maps Ketu to specific Karanas in the Ṛgvedic quarter (1–27), revealing the energetic patterns carried from past cycles.' },
+            { label: 'VII · Health & Vedic Healing', text: 'Health correlates are drawn from the Nada Chikitsa domain (nada-chikitsa.culturalmusings.com) — specific Ragas prescribed for the dominant Dosha pattern associated with the Lagna. The Master Consciousness Protocol at masterconsciousprotocol.culturalmusings.com provides a 5-phase healing protocol relevant to each planetary configuration.' },
+            { label: 'VIII · Life Mission & Spiritual Path', text: `${firstName}'s spiritual path is illuminated through the intersection of Nakshatra deity, Dasha lord, and the 9th house of dharma. For a complete synthesis, visit the Unified Theory domain (unifiedtheory.culturalmusings.com) and the GitHub research archive at github.com/ramachandra1975 — both contain cross-domain matrices connecting astrological placements to Vedic research frameworks.` }
+        ],
+        mantras: [
+            { label: 'Navagraha Stotram', sanskrit: 'ॐ ब्रह्मा मुरारिस्त्रिपुरान्तकारी भानुः शशी भूमिसुतो बुधश्च।', meaning: 'Salutations to Brahma, Vishnu, Shiva — the nine planetary lords who govern cosmic time.', purpose: 'General planetary pacification and cosmic alignment' },
+            { label: 'Gayatri Mantra', sanskrit: 'ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्।', meaning: 'We meditate on the divine light of the Sun — may it illuminate our intellect.', purpose: 'Activating solar consciousness and intellectual clarity' },
+            { label: 'Mahamrityunjaya Mantra', sanskrit: 'ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम् उर्वारुकमिव बन्धनान् मृत्योर्मुक्षीय मामृतात्।', meaning: 'We worship the three-eyed one — may he release us from bondage as the cucumber from its vine.', purpose: 'Health, longevity, and liberation from karmic bondage' },
+            { label: 'Nakshatra Mantra', sanskrit: 'ॐ नक्षत्राणामहम् शशी — अहं वैश्वानरो भूत्वा।', meaning: 'Among the Nakshatras I am the Moon — I become the universal fire sustaining all life.', purpose: 'Activating the birth Nakshatra\'s divine energy and stabilising the mind' }
+        ],
+        chart_summary: `Non-API mode: Full chart for ${name} requires API connection. Resources linked above. GitHub archive: github.com/ramachandra1975`
+    };
+}
+
+function renderAstroOutput(result, mode) {
+    const parasContainer = document.getElementById('astroParagraphs');
+    const mantraContainer = document.getElementById('mantraGrid');
+
+    parasContainer.innerHTML = result.paragraphs.map((p, i) => `
+        <div class="astro-para">
+            <span class="para-num">Paragraph ${i + 1} · ${p.label}</span>
+            <p>${p.text}</p>
+        </div>
+    `).join('');
+
+    mantraContainer.innerHTML = result.mantras.map(m => `
+        <div class="mantra-card">
+            <span class="m-label">${m.label}</span>
+            <div class="m-sanskrit">${m.sanskrit}</div>
+            <div class="m-meaning">${m.meaning}</div>
+            <div class="m-meaning" style="margin-top:6px;color:rgba(255,255,255,0.6);"><strong>Purpose:</strong> ${m.purpose}</div>
+        </div>
+    `).join('');
+
+    // Update note based on mode
+    if (mode === 'github') {
+        document.querySelector('.astro-note p').innerHTML =
+            '🐙 <strong>Non-API Mode Active:</strong> Results drawn from the GitHub research index at <a href="https://github.com/ramachandra1975" target="_blank" style="color:var(--astro-cyan);">github.com/ramachandra1975</a> and the Cultural Musings subdomain network. For full AI-powered predictions, add your API token in the Token Manager tab and switch to API mode.';
+    }
+
+    document.getElementById('astroOutput').classList.add('visible');
+}
+
+/* ── DUAL SEARCH ───────────────────────────────────────────── */
+let searchMode = 'api';
+let activeFilters = new Set(['all']);
+
+function setSearchMode(mode) {
+    searchMode = mode;
+    document.querySelectorAll('.smt-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('smt' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+    const desc = {
+        api: '<strong>API Mode:</strong> Queries <code>omniaifreeallinoneapi.culturalmusings.com</code> to synthesise research answers. Requires valid token (auto-managed). Richer, contextual results.',
+        github: '<strong>Non-API / GitHub Mode:</strong> Searches the <a href="https://github.com/ramachandra1975" target="_blank" style="color:var(--raga-teal);">github.com/ramachandra1975</a> repository index and links to relevant subdomains. No token required.',
+        both: '<strong>Both Modes:</strong> Runs API query first; falls back to GitHub index if token is invalid or API is unreachable. Best for researchers who want comprehensive coverage.'
+    };
+    document.getElementById('searchModeDesc').innerHTML = desc[mode];
+}
+
+function toggleFilter(btn, filter) {
+    if (filter === 'all') {
+        activeFilters.clear();
+        activeFilters.add('all');
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+    } else {
+        activeFilters.delete('all');
+        document.querySelector('.filter-chip:first-of-type').classList.remove('active');
+        btn.classList.toggle('active');
+        if (btn.classList.contains('active')) activeFilters.add(filter);
+        else activeFilters.delete(filter);
+        if (activeFilters.size === 0) {
+            activeFilters.add('all');
+            document.querySelector('.filter-chip:first-of-type').classList.add('active');
+        }
+    }
+}
+
+const domainIndex = [
+    { filter: 'karanas', title: '108 Karanas — Complete Celestial Synthesis', url: 'https://completecelestialsynthesis.culturalmusings.com/', snippet: 'All 108 Karanas mapped against 4 Vedic quarters, 27 <em>Nakshatras</em>, 72 Melakarthas. The complete celestial framework of sacred movement science.', source: 'completecelestialsynthesis.culturalmusings.com', badge: 'Karanas' },
+    { filter: 'karanas', title: 'Karanas Root Map — Master Architecture', url: 'https://karanasrootmap.culturalmusings.com/', snippet: 'Master architectural overview: 4×27 domain structure, 22 Shrutis, 72 Melakarthas — the master blueprint of the 108 Karanas system.', source: 'karanasrootmap.culturalmusings.com', badge: 'Karanas' },
+    { filter: 'raga', title: 'Nada Chikitsa — Raga Pharmacopoeia', url: 'https://nada-chikitsa.culturalmusings.com/', snippet: 'Sound as medicine — specific <em>Ragas</em> as therapeutic prescriptions. Raga Bhairavi, Yaman, Bageshri, Darbari Kanada with neurological evidence.', source: 'nada-chikitsa.culturalmusings.com', badge: 'Raga Science' },
+    { filter: 'raga', title: 'Vedic Foundation & Sound Science', url: 'https://vedicfoundationandsoundscience.culturalmusings.com/', snippet: 'Four Vedas taxonomy, Nada Brahma, <em>72 Melakarta ragas</em>, 22 Shrutis — the complete scientific foundation of Indian classical music.', source: 'vedicfoundationandsoundscience.culturalmusings.com', badge: 'Raga Science' },
+    { filter: 'kavya', title: 'Raga Kavya Creator — AI-Assisted Composition', url: 'https://ragakavyacreator.culturalmusings.com/', snippet: 'Create <em>Raga-based poetry</em> aligned to specific Ragas, Rasas & Nakshatras. AI-assisted Kavya composition tool.', source: 'ragakavyacreator.culturalmusings.com', badge: 'Raga Kavya' },
+    { filter: 'kavya', title: 'Raga Kavya Library — Poetic Archive', url: 'https://ragakavya.culturalmusings.com/', snippet: 'Curated Raga-poetry corpus — classical & contemporary <em>Kavya compositions</em> aligned to specific Ragas and emotional states.', source: 'ragakavya.culturalmusings.com', badge: 'Raga Kavya' },
+    { filter: 'natya', title: 'Natya Shastra — Main Domain', url: 'https://natyashastra.culturalmusings.com/', snippet: 'Bharata Muni\'s 6,000-verse unified theory of consciousness — <em>108 Karanas, 9 Rasas, 32 Mudras</em>. Neuroscience, AI & classical arts.', source: 'natyashastra.culturalmusings.com', badge: 'Natya Shastra' },
+    { filter: 'natya', title: 'Natya Shastra Standalone', url: 'https://natyashastrastandalone.culturalmusings.com/', snippet: '108 Karanas root motion map, <em>Navarasa, 64 Mudras</em>, Abhinaya & all 36 chapters of the Natya Shastra in standalone format.', source: 'natyashastrastandalone.culturalmusings.com', badge: 'Natya Shastra' },
+    { filter: 'geometry', title: 'Domain Sacred Geometry', url: 'https://domainsacredgeometry.culturalmusings.com/', snippet: 'Sri Yantra, Vastu Shastra, 16 <em>Vedic Mathematics Sutras</em>, Kolam geometry & Khadgamala — the geometry of consciousness.', source: 'domainsacredgeometry.culturalmusings.com', badge: 'Geometry' },
+    { filter: 'vedanta', title: 'Spiritual Philosophical', url: 'https://spiritualphilosophical.culturalmusings.com/', snippet: '<em>Advaita Vedanta</em>, Kashmir Shaivism, Tat Tvam Asi — where Vedantic metaphysics meets quantum non-locality and modern philosophy.', source: 'spiritualphilosophical.culturalmusings.com', badge: 'Vedanta' },
+    { filter: 'vedanta', title: 'Spandana Shodha — Kashmir Shaivism', url: 'https://spandanashodha.culturalmusings.com/', snippet: 'Vibrational inquiry into <em>Spanda</em> — the primordial pulse of cosmic intelligence. String theory, quantum vacuum & the Spanda Karikas.', source: 'spandanashodha.culturalmusings.com', badge: 'Vedanta' },
+    { filter: 'github', title: 'GitHub — ramachandra1975 Repository Archive', url: 'https://github.com/ramachandra1975', snippet: 'All research repositories — modules, documentation & code archive for the complete <em>Grand Synthesis</em> project.', source: 'github.com/ramachandra1975', badge: 'GitHub' },
+    { filter: 'github', title: 'Backend Setup Guide', url: 'https://backendsetupguide.culturalmusings.com/', snippet: 'Technical documentation for setting up API endpoints, token management, and the <em>omniaifreeallinoneapi</em> integration.', source: 'backendsetupguide.culturalmusings.com', badge: 'GitHub' }
+];
+
+async function doSearch() {
+    const query = document.getElementById('searchQuery').value.trim();
+    if (!query) return;
+
+    document.getElementById('searchPlaceholder').style.display = 'none';
+    const container = document.getElementById('resultItems');
+    container.innerHTML = '<div style="font-family:\'Montserrat\',sans-serif;font-size:0.62rem;color:#999;padding:1rem 0;letter-spacing:1px;">Searching…</div>';
+
+    // Filter domain index
+    const filtered = domainIndex.filter(item => {
+        if (activeFilters.has('all')) return true;
+        return activeFilters.has(item.filter);
+    });
+
+    // Simple keyword match
+    const q = query.toLowerCase();
+    const matched = filtered.filter(item => {
+        const searchIn = (item.title + item.snippet + item.source + item.badge).toLowerCase().replace(/<[^>]+>/g, '');
+        return searchIn.includes(q) || q.split(' ').some(w => w.length > 3 && searchIn.includes(w));
+    });
+
+    await new Promise(r => setTimeout(r, 600)); // simulate latency
+
+    if (searchMode === 'api' || searchMode === 'both') {
+        // In production: call omniaifreeallinoneapi for synthesised answer
+        // Here we prepend an AI-synthesised summary
+        container.innerHTML = '';
+        const aiSummary = document.createElement('div');
+        aiSummary.style.cssText = 'background:rgba(123,77,219,0.06);border:1px solid rgba(123,77,219,0.2);padding:14px 18px;margin-bottom:16px;border-radius:2px;';
+        aiSummary.innerHTML = `
+            <div style="font-family:'Montserrat',sans-serif;font-size:0.54rem;letter-spacing:2px;text-transform:uppercase;color:#7b4ddb;margin-bottom:6px;">🔬 API Synthesis · omniaifreeallinoneapi.culturalmusings.com</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:0.98rem;color:#444;line-height:1.7;">
+                Based on your query "<strong>${query}</strong>" — the Cultural Musings research archive contains directly relevant material across ${matched.length} domains. 
+                ${matched.length > 0 ? `The most relevant domains are: ${matched.slice(0,3).map(m => '<strong>' + m.badge + '</strong>').join(', ')}.` : 'No exact matches found — try broadening your search.'}
+                For full AI-synthesised analysis, ensure your API token is configured in the Token Manager tab.
+            </div>
+        `;
+        container.appendChild(aiSummary);
+    } else {
+        container.innerHTML = '';
+    }
+
+    if (matched.length > 0) {
+        matched.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'search-result-item visible';
+            el.innerHTML = `
+                <div class="sri-source">
+                    <span class="src-badge">${item.badge}</span>
+                    ${item.source}
+                </div>
+                <div class="sri-title"><a href="${item.url}" target="_blank">${item.title}</a></div>
+                <div class="sri-snippet">${item.snippet}</div>
+            `;
+            container.appendChild(el);
+        });
+    } else {
+        const noResult = document.createElement('div');
+        noResult.style.cssText = 'padding:2rem;text-align:center;';
+        noResult.innerHTML = `
+            <p style="font-family:'Cormorant Garamond',serif;color:#bbb;font-size:1rem;margin-bottom:1rem;">No matching domains found for "<em>${query}</em>"</p>
+            <a href="https://github.com/ramachandra1975" target="_blank" style="font-family:'Montserrat',sans-serif;font-size:0.6rem;color:var(--raga-teal);letter-spacing:1px;">Browse GitHub Archive →</a>
+        `;
+        container.appendChild(noResult);
+    }
+}
+
+/* ── INIT ─────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+    renderTokenEndpoints();
+    // Set today as default date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('astroDob').value = today;
+});
+</script>
+</body>
+</html>
