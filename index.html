@@ -288,8 +288,9 @@ header h1 em { font-style: italic; color: var(--gold); }
 }
 .domain-link:hover { background: var(--surface-hover); border-color: var(--border-strong); }
 .domain-link .dicon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.domain-link .dtext .dname { font-size: 12px; color: var(--text-primary); font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 0.02em; }
-.domain-link .dtext .durl { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+.domain-link .dtext { min-width: 0; flex: 1; overflow: hidden; }
+.domain-link .dtext .dname { font-size: 12px; color: var(--text-primary); font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.domain-link .dtext .durl { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 
 .search-box { display: flex; gap: 8px; margin-bottom: 1rem; }
 .search-input {
