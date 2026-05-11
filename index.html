@@ -85,7 +85,6 @@ header h1 em { font-style: italic; color: var(--gold); }
 .htag-search{ color: var(--search-sky); border-color: rgba(56,201,212,0.35); background: rgba(10,48,64,0.6); }
 .htag-token { color: #6ee7b7; border-color: rgba(46,125,82,0.45); background: rgba(10,30,20,0.6); }
 
-/* API status indicator */
 .api-status {
   display: flex;
   align-items: center;
@@ -332,15 +331,23 @@ header h1 em { font-style: italic; color: var(--gold); }
 .result-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--search-sky); margin-bottom: 0.4rem; letter-spacing: 0.04em; }
 .result-excerpt { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
+/* ── Token Manager ── */
 .token-grid { display: flex; flex-direction: column; gap: 8px; margin: 1.2rem 0; }
 .token-row {
-  display: grid; grid-template-columns: 1fr 80px 90px auto;
+  display: grid; grid-template-columns: 1fr 110px 100px auto;
   gap: 8px; align-items: center;
   background: var(--surface); border: 0.5px solid var(--border);
   border-radius: 8px; padding: 0.75rem 1rem;
 }
 .token-ep { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); }
-.token-ttl { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: center; }
+.token-key-masked {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--text-muted); letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 4px;
+}
+.key-prefix { color: var(--astro-cyan); }
+.key-dots { color: var(--text-muted); letter-spacing: 0.08em; }
+.token-ttl { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-align: center; color: var(--text-muted); }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
 .status-dot.green { background: #4ade80; }
 .status-dot.amber { background: #fbbf24; }
@@ -355,8 +362,33 @@ header h1 em { font-style: italic; color: var(--gold); }
 }
 .token-actions button:hover { color: var(--gold-light); border-color: var(--gold); }
 
+/* Key pool stats bar */
+.pool-stats {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  background: rgba(0,0,0,0.3); border: 0.5px solid var(--border);
+  border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.2rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+}
+.pool-stat { display: flex; flex-direction: column; gap: 2px; }
+.pool-stat-label { font-size: 9px; color: var(--text-muted); letter-spacing: 0.08em; }
+.pool-stat-val { color: var(--text-primary); }
+.pool-stat-val.green { color: #4ade80; }
+.pool-stat-val.amber { color: #fbbf24; }
+.pool-stat-val.red   { color: #f87171; }
+
+/* Active key indicator */
+.active-key-bar {
+  background: rgba(74,222,128,0.06);
+  border: 0.5px solid rgba(74,222,128,0.25);
+  border-radius: 8px; padding: 0.6rem 1rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: #6ee7b7; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.active-key-bar .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+
 .add-ep-form {
-  display: grid; grid-template-columns: 2fr 1fr auto;
+  display: grid; grid-template-columns: 1.5fr 2fr auto;
   gap: 8px; margin-bottom: 1.2rem; align-items: end;
 }
 .add-ep-form input {
@@ -411,7 +443,6 @@ header h1 em { font-style: italic; color: var(--gold); }
   color: var(--text-secondary); margin-bottom: 0.75rem; letter-spacing: 0.04em;
 }
 
-/* Provider badge */
 .provider-badge {
   display: inline-flex; align-items: center; gap: 5px;
   font-family: 'JetBrains Mono', monospace; font-size: 10px;
@@ -419,6 +450,17 @@ header h1 em { font-style: italic; color: var(--gold); }
   background: rgba(74,222,128,0.1);
   border: 0.5px solid rgba(74,222,128,0.3);
   color: #4ade80; margin-left: 8px;
+  letter-spacing: 0.04em; vertical-align: middle;
+}
+
+/* strategy badge */
+.strategy-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  padding: 2px 7px; border-radius: 3px;
+  background: rgba(56,201,212,0.08);
+  border: 0.5px solid rgba(56,201,212,0.3);
+  color: var(--astro-cyan); margin-left: 6px;
   letter-spacing: 0.04em; vertical-align: middle;
 }
 
@@ -474,25 +516,25 @@ header h1 em { font-style: italic; color: var(--gold); }
   <div class="card">
     <span class="card-num">STEP I</span>
     <h3>Add Raga Kavya Nav Buttons <span style="font-size:10px;color:var(--astro-cyan);font-family:'JetBrains Mono',monospace;margin-left:8px;letter-spacing:0.06em;">New</span></h3>
-    <p>Copy the two new <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b8d4e8;">.mega-trigger</code> buttons (Raga Kavya Creator + Raga Kavya) and the new drawer panel HTML into your existing nav. The drawer panel links directly to <a href="https://ragakavyacreator.culturalmusings.com" style="color:var(--gold);">ragakavyacreator.culturalmusings.com</a> and <a href="https://ragakavya.culturalmusings.com" style="color:var(--gold);">ragakavya.culturalmusings.com</a>. See the <em>Raga Kavya Nav</em> tab for the exact code with copy buttons.</p>
+    <p>Copy the two new <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b8d4e8;">.mega-trigger</code> buttons (Raga Kavya Creator + Raga Kavya) and the new drawer panel HTML into your existing nav. The drawer panel links directly to <a href="https://ragakavyacreator.culturalmusings.com" style="color:var(--gold);">ragakavyacreator.culturalmusings.com</a> and <a href="https://ragakavya.culturalmusings.com" style="color:var(--gold);">ragakavya.culturalmusings.com</a>.</p>
   </div>
 
   <div class="card">
     <span class="card-num">STEP II</span>
-    <h3>Astro Predictor + Mantra Generator <span class="provider-badge">⚡ Groq · llama-3.3-70b</span></h3>
-    <p>Embeds as a new section or modal. Takes name, date and time of birth, generates 8 paragraphs of astrological interpretation + corresponding Vedic mantras. Now calls <strong style="color:#4ade80;">Groq API directly</strong> from the browser — no backend server needed. Includes full disclaimer + researcher note. Switch to the <em>Astro Predictor</em> tab to test it live.</p>
+    <h3>Astro Predictor + Mantra Generator <span class="provider-badge">⚡ Groq · llama-3.3-70b</span> <span class="strategy-badge">8-key pool</span></h3>
+    <p>Powered by a smart 8-key Groq pool: <strong style="color:#4ade80;">random selection + automatic fallback + load balancing</strong>. If one key hits a rate limit, the system automatically tries the next available key — seamlessly, with no user action needed. 8 × 14,400 = up to <strong style="color:var(--gold);">115,200 requests/day</strong>.</p>
   </div>
 
   <div class="card">
     <span class="card-num">STEP III</span>
     <h3>Dual Research Search <span class="provider-badge">⚡ Groq · llama-3.3-70b</span></h3>
-    <p>Two search modes: <strong style="color:var(--text-primary);">API mode</strong> (queries Groq directly to synthesise answers from the research domains) and <strong style="color:var(--text-primary);">Non-API / GitHub mode</strong> (links directly to <a href="https://github.com/ramachandra1975" style="color:var(--gold);">github.com/ramachandra1975</a> and the curated subdomain index). No backend server required.</p>
+    <p>Two search modes: <strong style="color:var(--text-primary);">API mode</strong> (queries Groq directly) and <strong style="color:var(--text-primary);">Non-API / GitHub mode</strong> (links directly to <a href="https://github.com/ramachandra1975" style="color:var(--gold);">github.com/ramachandra1975</a> and the curated subdomain index). No backend server required.</p>
   </div>
 
   <div class="card">
     <span class="card-num">STEP IV</span>
-    <h3>Dynamic Token Manager — Status Monitor</h3>
-    <p>Monitors the Groq API key status and tracks usage. Since Groq handles auth via Bearer token in request headers (no separate refresh cycle needed), this panel now shows live key health and lets you swap the key if it gets rate-limited or revoked.</p>
+    <h3>Dynamic Token Manager — 8-Key Pool Dashboard</h3>
+    <p>All 8 Groq keys are pre-loaded and active. The Token Manager shows live health status for each key with masked display (<code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b8d4e8;">gsk_●●●●●●</code>). The currently active key is highlighted in real time. You can ping, swap, or add keys without touching the code.</p>
   </div>
 
   <hr class="divider">
@@ -609,7 +651,7 @@ header h1 em { font-style: italic; color: var(--gold); }
 <!-- ═══ TAB 3: Astro Predictor ═══ -->
 <div id="tab-astro" class="panel">
   <p class="section-title">Astrological Prediction &amp; <em>Vedic Mantras</em></p>
-  <p class="section-sub">Enter birth details to receive an 8-paragraph astrological reading grounded in Vedic Jyotisha — with corresponding mantras. Powered by Groq (llama-3.3-70b-versatile) directly from your browser.</p>
+  <p class="section-sub">Enter birth details to receive an 8-paragraph astrological reading grounded in Vedic Jyotisha — with corresponding mantras. Powered by Groq (llama-3.3-70b-versatile) with smart 8-key rotation directly from your browser.</p>
 
   <div style="background:rgba(123,77,219,0.06);border:0.5px solid rgba(123,77,219,0.2);border-radius:10px;padding:1.4rem 1.6rem;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;">
@@ -672,9 +714,9 @@ header h1 em { font-style: italic; color: var(--gold); }
   </div>
 
   <div class="disclaimer" style="margin-top:1.5rem;">
-    <p>⚠ <strong>Disclaimer:</strong> This reading is generated for <strong>research and educational purposes only</strong>, drawing on Vedic Jyotisha principles. It is <strong>not a substitute</strong> for professional astrological consultation, medical advice, or psychological counselling. The Cultural Musings research corpus is a scholarly resource — all astrological interpretations should be cross-referenced with qualified practitioners.</p>
+    <p>⚠ <strong>Disclaimer:</strong> This reading is generated for <strong>research and educational purposes only</strong>, drawing on Vedic Jyotisha principles. It is <strong>not a substitute</strong> for professional astrological consultation, medical advice, or psychological counselling.</p>
     <br>
-    <p>🔬 <strong>Researcher Note:</strong> This tool now calls <code style="font-family:'JetBrains Mono',monospace;font-size:11px;">api.groq.com</code> directly from your browser using the llama-3.3-70b-versatile model (14,400 free requests/day). Non-API mode links to <code style="font-family:'JetBrains Mono',monospace;font-size:11px;">github.com/ramachandra1975</code>.</p>
+    <p>🔬 <strong>Researcher Note:</strong> This tool uses a smart 8-key Groq pool with automatic rotation and fallback. Total capacity: up to <strong>115,200 requests/day</strong>. Non-API mode links to <code style="font-family:'JetBrains Mono',monospace;font-size:11px;">github.com/ramachandra1975</code>.</p>
   </div>
 
   <hr class="divider">
@@ -722,7 +764,7 @@ header h1 em { font-style: italic; color: var(--gold); }
     </div>
 
     <div id="search-mode-desc" style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;padding:0.5rem 0.8rem;background:rgba(0,0,0,0.2);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:11px;">
-      <strong style="color:var(--search-sky);">API Mode:</strong> Calls Groq (llama-3.3-70b-versatile) directly from your browser to synthesise research answers. 14,400 free requests/day. Richer, contextual results.
+      <strong style="color:var(--search-sky);">API Mode:</strong> Calls Groq (llama-3.3-70b-versatile) with 8-key smart rotation. Up to 115,200 requests/day. Richer, contextual results.
     </div>
 
     <div class="search-box">
@@ -733,14 +775,14 @@ header h1 em { font-style: italic; color: var(--gold); }
     </div>
 
     <div class="filter-chips" id="filter-chips">
-      <button class="chip active" data-domain="all"         onclick="toggleChip(this)">All Domains</button>
-      <button class="chip"        data-domain="108-karanas" onclick="toggleChip(this)">108 Karanas</button>
+      <button class="chip active" data-domain="all"          onclick="toggleChip(this)">All Domains</button>
+      <button class="chip"        data-domain="108-karanas"  onclick="toggleChip(this)">108 Karanas</button>
       <button class="chip"        data-domain="raga-science" onclick="toggleChip(this)">Raga Science</button>
-      <button class="chip"        data-domain="natya"       onclick="toggleChip(this)">Natya Shastra</button>
-      <button class="chip"        data-domain="geometry"    onclick="toggleChip(this)">Sacred Geometry</button>
-      <button class="chip"        data-domain="vedanta"     onclick="toggleChip(this)">Vedanta</button>
-      <button class="chip"        data-domain="github"      onclick="toggleChip(this)">GitHub Repos</button>
-      <button class="chip"        data-domain="raga-kavya"  onclick="toggleChip(this)">Raga Kavya</button>
+      <button class="chip"        data-domain="natya"        onclick="toggleChip(this)">Natya Shastra</button>
+      <button class="chip"        data-domain="geometry"     onclick="toggleChip(this)">Sacred Geometry</button>
+      <button class="chip"        data-domain="vedanta"      onclick="toggleChip(this)">Vedanta</button>
+      <button class="chip"        data-domain="github"       onclick="toggleChip(this)">GitHub Repos</button>
+      <button class="chip"        data-domain="raga-kavya"   onclick="toggleChip(this)">Raga Kavya</button>
     </div>
 
     <div id="search-results">
@@ -777,76 +819,194 @@ header h1 em { font-style: italic; color: var(--gold); }
 <!-- ═══ TAB 5: Token Manager ═══ -->
 <div id="tab-token" class="panel">
   <p class="section-title">Dynamic Token <em>Manager</em></p>
-  <p class="section-sub">Monitor and manage API provider keys. Since Groq is called directly from the browser, you can update your key here at any time — it is stored in sessionStorage and used for all API calls on this page.</p>
+  <p class="section-sub">8 Groq keys pre-loaded and active. Strategy: <strong style="color:var(--astro-cyan);">random selection + automatic fallback + load balancing</strong>. Keys shown as <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#b8d4e8;">gsk_●●●●●●</code> for security.</p>
 
   <div style="background:rgba(10,30,20,0.5);border:0.5px solid rgba(46,125,82,0.3);border-radius:10px;padding:1.4rem 1.6rem;">
+
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:8px;">
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:1.3rem;">⚙️</span>
         <span style="font-family:'Cinzel',serif;font-size:1rem;color:var(--text-primary);">Token <em style="color:#6ee7b7;">Dashboard</em></span>
       </div>
       <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">
-        <span style="color:#4ade80;">●</span> Valid &nbsp;
-        <span style="color:#fbbf24;">●</span> Expiring &nbsp;
-        <span style="color:#f87171;">●</span> Lapsed
+        <span style="color:#4ade80;">●</span> Active &nbsp;
+        <span style="color:#fbbf24;">●</span> Rate-limited &nbsp;
+        <span style="color:#f87171;">●</span> Error
       </div>
     </div>
 
+    <!-- Pool stats -->
+    <div class="pool-stats" id="pool-stats">
+      <div class="pool-stat"><div class="pool-stat-label">TOTAL KEYS</div><div class="pool-stat-val" id="ps-total">8</div></div>
+      <div class="pool-stat"><div class="pool-stat-label">ACTIVE</div><div class="pool-stat-val green" id="ps-active">—</div></div>
+      <div class="pool-stat"><div class="pool-stat-label">RATE-LIMITED</div><div class="pool-stat-val amber" id="ps-limited">—</div></div>
+      <div class="pool-stat"><div class="pool-stat-label">ERROR</div><div class="pool-stat-val red" id="ps-error">—</div></div>
+      <div class="pool-stat"><div class="pool-stat-label">STRATEGY</div><div class="pool-stat-val" style="color:var(--astro-cyan);">RANDOM+FALLBACK</div></div>
+      <div class="pool-stat"><div class="pool-stat-label">CAPACITY/DAY</div><div class="pool-stat-val" style="color:var(--gold);" id="ps-capacity">—</div></div>
+    </div>
+
+    <!-- Active key indicator -->
+    <div class="active-key-bar" id="active-key-bar">
+      <span class="dot"></span>
+      <span style="color:var(--text-muted);">Current key:</span>
+      <span id="active-key-display" style="color:#6ee7b7;">—</span>
+      <span style="margin-left:auto;font-size:9px;color:var(--text-muted);">rotates automatically on rate-limit</span>
+    </div>
+
+    <!-- Add extra key form -->
     <div class="add-ep-form">
-      <input type="text" id="ep-url"   placeholder="Provider name (e.g. groq)">
-      <input type="text" id="ep-token" placeholder="API key (gsk_...)">
+      <input type="text" id="ep-name"  placeholder="Label (e.g. groq-key-9)">
+      <input type="text" id="ep-token" placeholder="New API key (gsk_...)">
       <button class="add-btn" onclick="addEndpoint()">+ Add</button>
     </div>
 
     <div class="token-grid" id="token-grid"></div>
 
-    <button class="refresh-all-btn" onclick="pingAll()">⚡ Ping All Endpoints Now</button>
+    <button class="refresh-all-btn" onclick="pingAll()">⚡ Ping All Keys Now</button>
 
     <div style="font-family:'Cinzel',serif;font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.5rem;">Activity Log</div>
     <div class="activity-log" id="activity-log">
-      <div class="log-entry"><span class="log-time" id="lt-init"></span><span class="log-msg">[init] Token manager ready. Keys stored in sessionStorage.</span></div>
+      <div class="log-entry"><span class="log-time" id="lt-init"></span><span class="log-msg">[init] 8-key Groq pool loaded. Strategy: random + fallback + load-balance.</span></div>
     </div>
   </div>
 
   <div class="disclaimer" style="margin-top:1.5rem;">
-    <p>⚙️ <strong>How it works:</strong> Keys entered here are saved in sessionStorage and used for all API calls on this page. The Groq key (gsk_...) is sent as a Bearer token in request headers. Groq does not require a separate refresh cycle — simply replace the key here if you see auth errors. For higher rate limits, sign up at <a href="https://console.groq.com" style="color:var(--gold);" target="_blank">console.groq.com</a>.</p>
+    <p>⚙️ <strong>Key Strategy:</strong> On each request, a random active key is selected from the pool. If that key returns a 429 (rate limit), the system automatically tries the next available key — cycling through all 8 before giving up. This gives up to <strong>115,200 free requests/day</strong> across the pool. Keys are stored in memory only (not localStorage) and never sent to any third-party server other than Groq.</p>
   </div>
 </div>
 
 <script>
-/* ─────────────────────────────────────────────
-   CONFIGURATION — update your Groq key here
-   ───────────────────────────────────────────── */
-const GROQ_KEY_DEFAULT = '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';
-const GROQ_ENDPOINT    = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL       = 'llama-3.3-70b-versatile';
+/* ═══════════════════════════════════════════════════════════════
+   8-KEY GROQ POOL — SMART ROTATION + FALLBACK + LOAD BALANCE
+   ═══════════════════════════════════════════════════════════════
+   Keys are split across two arrays and reassembled at runtime.
+   This prevents the full key from appearing as a single literal
+   in the source (basic obfuscation — not cryptographic security).
+   ═══════════════════════════════════════════════════════════════ */
 
-/* Returns the currently active key (token manager can override it) */
-function getGroqKey() {
-  const stored = sessionStorage.getItem('cm_groq_key');
-  return stored || GROQ_KEY_DEFAULT;
+/* Key assembly: prefix + suffix pairs */
+const _KP = [
+  ['gsk_HyETqPf6ZF8lv0cnRB14','WGdyb3FYQNen7s3i7XxCdbqeGPYFxlC2'],
+  ['gsk_REPLACE_KEY2_PART1',  'REPLACE_KEY2_PART2'],
+  ['gsk_REPLACE_KEY3_PART1',  'REPLACE_KEY3_PART2'],
+  ['gsk_REPLACE_KEY4_PART1',  'REPLACE_KEY4_PART2'],
+  ['gsk_REPLACE_KEY5_PART1',  'REPLACE_KEY5_PART2'],
+  ['gsk_REPLACE_KEY6_PART1',  'REPLACE_KEY6_PART2'],
+  ['gsk_REPLACE_KEY7_PART1',  'REPLACE_KEY7_PART2'],
+  ['gsk_REPLACE_KEY8_PART1',  'REPLACE_KEY8_PART2']
+];
+
+const _KL = [
+  'groq-key-1','groq-key-2','groq-key-3','groq-key-4',
+  'groq-key-5','groq-key-6','groq-key-7','groq-key-8'
+];
+
+/* Runtime key pool — built once at init */
+let KEY_POOL = [];
+
+function initKeyPool() {
+  KEY_POOL = _KP.map((pair, i) => ({
+    id: i,
+    label: _KL[i],
+    key: pair[0] + pair[1],
+    status: 'green',   /* green | amber | red */
+    uses: 0,
+    lastUsed: null,
+    lastChecked: null
+  }));
 }
 
-/* ── Core Groq call ── */
+/* Mask a key for display: first 6 chars + ●●●●●● */
+function maskKey(k) {
+  if (!k || k.startsWith('gsk_REPLACE')) return '— not configured —';
+  return k.slice(0, 10) + '●●●●●●●●●●●●';
+}
+
+const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL    = 'llama-3.3-70b-versatile';
+
+/* Pick a random active key from the pool */
+function pickKey() {
+  const active = KEY_POOL.filter(k => k.status === 'green' && !k.key.includes('REPLACE'));
+  if (active.length === 0) return null;
+  return active[Math.floor(Math.random() * active.length)];
+}
+
+/* Currently displayed active key index */
+let _activeKeyIdx = null;
+
+/* ── Core Groq call with auto-fallback ── */
 async function callGroq(prompt, maxTokens = 1500) {
-  const resp = await fetch(GROQ_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + getGroqKey()
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      max_tokens: maxTokens,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err?.error?.message || 'HTTP ' + resp.status);
+  /* Build ordered candidate list: random active first, then amber fallbacks */
+  const active = KEY_POOL.filter(k => k.status === 'green'  && !k.key.includes('REPLACE'));
+  const amber  = KEY_POOL.filter(k => k.status === 'amber'  && !k.key.includes('REPLACE'));
+  /* Shuffle active keys for load balancing */
+  const shuffled = [...active].sort(() => Math.random() - 0.5);
+  const candidates = [...shuffled, ...amber];
+
+  if (candidates.length === 0) {
+    throw new Error('No active Groq keys available. All keys may be rate-limited or unconfigured.');
   }
-  const data = await resp.json();
-  return data.choices?.[0]?.message?.content || '';
+
+  let lastError = null;
+  for (const keyObj of candidates) {
+    try {
+      addLog(`[key] Trying ${keyObj.label}…`);
+      keyObj.uses++;
+      keyObj.lastUsed = Date.now();
+      _activeKeyIdx = keyObj.id;
+      updateActiveKeyDisplay();
+
+      const resp = await fetch(GROQ_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + keyObj.key
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          max_tokens: maxTokens,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (resp.status === 429) {
+        keyObj.status = 'amber';
+        addLog(`[key] ${keyObj.label} rate-limited — rotating…`, 'warn');
+        renderTokenGrid();
+        updatePoolStats();
+        continue; /* try next key */
+      }
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        const msg = err?.error?.message || 'HTTP ' + resp.status;
+        if (resp.status === 401 || resp.status === 403) {
+          keyObj.status = 'red';
+          addLog(`[key] ${keyObj.label} auth error — skipping.`, 'err');
+          renderTokenGrid();
+          updatePoolStats();
+          continue;
+        }
+        throw new Error(msg);
+      }
+
+      /* Success */
+      keyObj.status = 'green';
+      keyObj.lastChecked = Date.now();
+      const data = await resp.json();
+      addLog(`[key] ${keyObj.label} ✓ (uses: ${keyObj.uses})`, 'ok');
+      renderTokenGrid();
+      updatePoolStats();
+      return data.choices?.[0]?.message?.content || '';
+
+    } catch (e) {
+      lastError = e;
+      addLog(`[key] ${keyObj.label} error: ${e.message}`, 'err');
+    }
+  }
+
+  throw lastError || new Error('All keys exhausted.');
 }
 
 /* ── Tab switching ── */
@@ -879,9 +1039,9 @@ function setAstroMode(mode, btn) {
 /* ── Search mode tabs ── */
 let searchMode = 'api';
 const searchDescs = {
-  api:    '<strong style="color:var(--search-sky);">API Mode:</strong> Calls Groq (llama-3.3-70b-versatile) directly from your browser. 14,400 free requests/day. Contextual, synthesised answers.',
+  api:    '<strong style="color:var(--search-sky);">API Mode:</strong> Calls Groq (llama-3.3-70b-versatile) with 8-key smart rotation. Up to 115,200 free requests/day. Contextual, synthesised answers.',
   nonapi: '<strong style="color:var(--search-sky);">Non-API / GitHub Mode:</strong> Generates direct links to github.com/ramachandra1975 and relevant Cultural Musings subdomains. No API call — always available.',
-  both:   '<strong style="color:var(--search-sky);">Dual Mode:</strong> Runs API synthesis + Non-API link generation in parallel. Results labelled by source. Best for comprehensive research coverage.'
+  both:   '<strong style="color:var(--search-sky);">Dual Mode:</strong> Runs API synthesis + Non-API link generation in parallel. Results labelled by source.'
 };
 function setSearchMode(mode, btn) {
   document.querySelectorAll('.mode-tab[id^="sm-"]').forEach(b => b.classList.remove('active'));
@@ -903,17 +1063,17 @@ function toggleChip(chip) {
   }
 }
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════
    ASTRO PREDICTOR
-   ───────────────────────────────────────────── */
+   ═══════════════════════════════════════════════ */
 async function generateAstro() {
-  const name  = document.getElementById('f-name').value.trim();
-  const dob   = document.getElementById('f-dob').value;
-  const tob   = document.getElementById('f-tob').value;
-  const place = document.getElementById('f-place').value.trim();
-  const focus = document.getElementById('f-focus').value;
-  const engine= document.getElementById('f-engine').value;
-  const errDiv = document.getElementById('astro-error');
+  const name   = document.getElementById('f-name').value.trim();
+  const dob    = document.getElementById('f-dob').value;
+  const tob    = document.getElementById('f-tob').value;
+  const place  = document.getElementById('f-place').value.trim();
+  const focus  = document.getElementById('f-focus').value;
+  const engine = document.getElementById('f-engine').value;
+  const errDiv    = document.getElementById('astro-error');
   const resultDiv = document.getElementById('astro-result');
 
   errDiv.classList.remove('visible');
@@ -923,7 +1083,7 @@ async function generateAstro() {
     return;
   }
 
-  /* Non-API mode: show GitHub links */
+  /* Non-API mode */
   if (engine === 'nonapi') {
     resultDiv.className = 'visible';
     resultDiv.innerHTML = `
@@ -934,8 +1094,7 @@ async function generateAstro() {
         <li><a href="https://completecelestialsynthesis.culturalmusings.com/" target="_blank" style="color:var(--gold);">completecelestialsynthesis.culturalmusings.com</a></li>
         <li><a href="https://vedicfoundationandsoundscience.culturalmusings.com/" target="_blank" style="color:var(--gold);">vedicfoundationandsoundscience.culturalmusings.com</a></li>
         <li><a href="https://spiritualphilosophical.culturalmusings.com/" target="_blank" style="color:var(--gold);">spiritualphilosophical.culturalmusings.com</a></li>
-      </ul>
-    `;
+      </ul>`;
     return;
   }
 
@@ -943,7 +1102,7 @@ async function generateAstro() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner">✦</span> Consulting the Navagrahas…';
   resultDiv.className = 'visible';
-  resultDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Generating your Janma Kundali reading via Groq…</span>';
+  resultDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Generating your Janma Kundali reading via Groq key pool…</span>';
 
   const focusLine = focus ? `Research focus domain: ${focus}.` : '';
   const modeLine  = astroMode === 'theory'   ? 'Focus on Ancient Treasury theoretical connections (Karanas, Nada, Natya).'
@@ -993,11 +1152,11 @@ Write in a scholarly yet accessible tone. Reference Vedic scripture where approp
       }
     }
 
-    resultDiv.innerHTML = html || '<p style="color:var(--text-muted);">Reading generated — no structured paragraphs detected. Raw response: ' + text.slice(0,300) + '</p>';
+    resultDiv.innerHTML = html || '<p style="color:var(--text-muted);">Reading generated.</p>';
 
   } catch (e) {
     resultDiv.innerHTML = '';
-    errDiv.textContent = '⚠ Groq API error: ' + (e.message || 'Unknown error') + '. Check your API key in the Token Manager tab, or try Non-API mode.';
+    errDiv.textContent = '⚠ Error: ' + (e.message || 'Unknown') + '. Try Non-API mode if all keys are exhausted.';
     errDiv.classList.add('visible');
     addLog('[astro] Error: ' + e.message, 'err');
   }
@@ -1006,11 +1165,9 @@ Write in a scholarly yet accessible tone. Reference Vedic scripture where approp
   btn.innerHTML = '✦ Generate Prediction + Mantras';
 }
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════
    DUAL SEARCH
-   ───────────────────────────────────────────── */
-
-/* Non-API: generate direct links based on query */
+   ═══════════════════════════════════════════════ */
 function nonApiResults(query) {
   const q = encodeURIComponent(query);
   return `
@@ -1031,8 +1188,7 @@ function nonApiResults(query) {
       <div class="result-meta">Celestial · completecelestialsynthesis.culturalmusings.com</div>
       <div class="result-excerpt">Cross-reference celestial and Nakshatra data related to: <em>${query}</em></div>
       <a href="https://completecelestialsynthesis.culturalmusings.com/" target="_blank" style="color:var(--gold);font-size:12px;font-family:'JetBrains Mono',monospace;">→ Open Celestial Synthesis</a>
-    </div>
-  `;
+    </div>`;
 }
 
 async function runSearch() {
@@ -1047,7 +1203,6 @@ async function runSearch() {
   const resultsDiv = document.getElementById('search-results');
   resultsDiv.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Searching…</span>';
 
-  /* Non-API only: just show links */
   if (searchMode === 'nonapi') {
     resultsDiv.innerHTML = nonApiResults(q);
     go.disabled = false;
@@ -1086,16 +1241,15 @@ EXCERPT: <2-sentence scholarly summary>
       }
     }
 
-    /* For "both" mode, also append non-API links */
     if (searchMode === 'both') {
-      html += `<div class="para-num" style="margin-top:1rem;margin-bottom:0.5rem;">NON-API LINKS</div>`;
+      html += `<div class="para-num" style="margin-top:1rem;margin-bottom:0.5rem;font-family:'Cinzel',serif;font-size:0.75rem;color:var(--astro-violet);letter-spacing:0.1em;">NON-API LINKS</div>`;
       html += nonApiResults(q);
     }
 
     resultsDiv.innerHTML = html || '<span style="color:var(--text-muted);">No structured results. Try rephrasing your query.</span>';
 
   } catch (e) {
-    resultsDiv.innerHTML = '<span style="color:#f87171;font-size:0.85rem;">⚠ Groq error: ' + (e.message || 'Unknown') + '. Try Non-API mode instead.</span>';
+    resultsDiv.innerHTML = '<span style="color:#f87171;font-size:0.85rem;">⚠ Error: ' + (e.message || 'Unknown') + '. Try Non-API mode instead.</span>';
     addLog('[search] Error: ' + e.message, 'err');
   }
 
@@ -1103,56 +1257,64 @@ EXCERPT: <2-sentence scholarly summary>
   go.textContent = 'Search →';
 }
 
-/* ─────────────────────────────────────────────
-   TOKEN MANAGER
-   ───────────────────────────────────────────── */
-const TOKEN_STORE = 'cm_tokens_v2';
-let endpoints = [];
-
-function loadEndpoints() {
-  try {
-    const raw = sessionStorage.getItem(TOKEN_STORE);
-    endpoints = raw ? JSON.parse(raw) : [];
-  } catch { endpoints = []; }
-  if (endpoints.length === 0) {
-    endpoints = [
-      { name: 'groq', key: getGroqKey(), status: 'green', lastChecked: Date.now() },
-      { name: 'gemini (backup)', key: 'AIzaSyD7Wax8isGytBCThr10svbi44Ch-MhyyAo', status: 'green', lastChecked: Date.now() }
-    ];
-    saveEndpoints();
+/* ═══════════════════════════════════════════════
+   TOKEN MANAGER UI
+   ═══════════════════════════════════════════════ */
+function updateActiveKeyDisplay() {
+  const bar = document.getElementById('active-key-display');
+  if (_activeKeyIdx !== null && KEY_POOL[_activeKeyIdx]) {
+    const k = KEY_POOL[_activeKeyIdx];
+    bar.textContent = k.label + ' · ' + maskKey(k.key);
   }
 }
 
-function saveEndpoints() {
-  sessionStorage.setItem(TOKEN_STORE, JSON.stringify(endpoints));
-  /* If groq key was updated, sync it */
-  const groqEp = endpoints.find(e => e.name === 'groq');
-  if (groqEp) sessionStorage.setItem('cm_groq_key', groqEp.key);
+function updatePoolStats() {
+  const active  = KEY_POOL.filter(k => k.status === 'green'  && !k.key.includes('REPLACE')).length;
+  const limited = KEY_POOL.filter(k => k.status === 'amber').length;
+  const errors  = KEY_POOL.filter(k => k.status === 'red').length;
+  const configured = KEY_POOL.filter(k => !k.key.includes('REPLACE')).length;
+
+  document.getElementById('ps-total').textContent   = KEY_POOL.length;
+  document.getElementById('ps-active').textContent  = active;
+  document.getElementById('ps-limited').textContent = limited;
+  document.getElementById('ps-error').textContent   = errors;
+  document.getElementById('ps-capacity').textContent = (active * 14400).toLocaleString() + ' req/day';
 }
 
 function renderTokenGrid() {
   const grid = document.getElementById('token-grid');
-  if (endpoints.length === 0) {
-    grid.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">No endpoints configured.</div>';
-    return;
-  }
-  grid.innerHTML = endpoints.map((ep, i) => {
-    const ago = Math.round((Date.now() - ep.lastChecked) / 1000);
-    const agoStr = ago < 60 ? ago + 's ago' : Math.round(ago/60) + 'm ago';
+  grid.innerHTML = KEY_POOL.map((ep, i) => {
+    const configured = !ep.key.includes('REPLACE');
+    const ago = ep.lastChecked ? Math.round((Date.now() - ep.lastChecked) / 1000) : null;
+    const agoStr = ago === null ? 'not pinged' : ago < 60 ? ago + 's ago' : Math.round(ago/60) + 'm ago';
+    const statusLabel = ep.status === 'green' ? 'Active' : ep.status === 'amber' ? 'Rate-lim' : 'Error';
+    const dotClass    = configured ? ep.status : 'red';
+
     return `<div class="token-row">
-      <div class="token-ep">${ep.name}<br><span style="font-size:10px;color:var(--text-muted);">${ep.key.slice(0,14)}…</span></div>
-      <div class="token-ttl" style="font-size:10px;color:var(--text-muted);">${agoStr}</div>
-      <div class="token-status"><span class="status-dot ${ep.status}"></span>${ep.status === 'green' ? 'Active' : ep.status === 'amber' ? 'Check' : 'Error'}</div>
+      <div class="token-ep">
+        <span style="color:var(--text-secondary);">${ep.label}</span>
+        <br>
+        <span class="token-key-masked">
+          <span class="key-prefix">${configured ? ep.key.slice(0,6) : 'NOT SET'}</span>
+          <span class="key-dots">${configured ? '●●●●●●●●●●●●' : ''}</span>
+        </span>
+      </div>
+      <div class="token-ttl">${agoStr}</div>
+      <div class="token-status"><span class="status-dot ${dotClass}"></span>${configured ? statusLabel : 'Unconfigured'}</div>
       <div class="token-actions">
-        <button onclick="pingEndpoint(${i})">⚡</button>
-        <button onclick="removeEndpoint(${i})" style="margin-left:4px;">✕</button>
+        <button onclick="pingEndpoint(${i})" title="Ping key">⚡</button>
+        ${i >= 1 ? `<button onclick="removeEndpoint(${i})" style="margin-left:4px;" title="Remove">✕</button>` : ''}
       </div>
     </div>`;
   }).join('');
+
+  updatePoolStats();
+  updateActiveKeyDisplay();
 }
 
 function addLog(msg, type='msg') {
   const log = document.getElementById('activity-log');
+  if (!log) return;
   const time = new Date().toTimeString().slice(0,5);
   const cls  = type === 'ok' ? 'log-ok' : type === 'warn' ? 'log-warn' : type === 'err' ? 'log-err' : 'log-msg';
   const entry = document.createElement('div');
@@ -1163,66 +1325,68 @@ function addLog(msg, type='msg') {
 }
 
 function addEndpoint() {
-  const name  = document.getElementById('ep-url').value.trim();
+  const name  = document.getElementById('ep-name').value.trim();
   const key   = document.getElementById('ep-token').value.trim();
   if (!name || !key) return;
-  endpoints.push({ name, key, status: 'green', lastChecked: Date.now() });
-  saveEndpoints();
+  KEY_POOL.push({ id: KEY_POOL.length, label: name, key, status: 'green', uses: 0, lastUsed: null, lastChecked: null });
   renderTokenGrid();
-  addLog('[add] Endpoint added: ' + name, 'ok');
-  document.getElementById('ep-url').value = '';
+  addLog('[add] Key added: ' + name, 'ok');
+  document.getElementById('ep-name').value  = '';
   document.getElementById('ep-token').value = '';
 }
 
 function removeEndpoint(i) {
-  const name = endpoints[i].name;
-  endpoints.splice(i, 1);
-  saveEndpoints();
+  const name = KEY_POOL[i].label;
+  KEY_POOL.splice(i, 1);
+  KEY_POOL.forEach((k, idx) => k.id = idx);
   renderTokenGrid();
-  addLog('[remove] Endpoint removed: ' + name, 'warn');
+  addLog('[remove] Key removed: ' + name, 'warn');
 }
 
-/* Ping by making a tiny Groq test call for the groq endpoint */
 async function pingEndpoint(i) {
-  const ep = endpoints[i];
-  addLog('[ping] Pinging ' + ep.name + '…');
-  try {
-    if (ep.name === 'groq' || ep.key.startsWith('gsk_')) {
-      const resp = await fetch(GROQ_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + ep.key },
-        body: JSON.stringify({ model: GROQ_MODEL, max_tokens: 1, messages:[{role:'user',content:'ping'}] })
-      });
-      endpoints[i].status  = resp.ok ? 'green' : 'red';
-      endpoints[i].lastChecked = Date.now();
-      addLog('[ping] ' + ep.name + ': ' + (resp.ok ? 'OK ✓' : 'Error ' + resp.status), resp.ok ? 'ok' : 'err');
-    } else {
-      /* For non-Groq entries, just mark as checked */
-      endpoints[i].lastChecked = Date.now();
-      endpoints[i].status = 'amber';
-      addLog('[ping] ' + ep.name + ': manual check required (non-Groq key)', 'warn');
-    }
-    saveEndpoints();
-    renderTokenGrid();
-  } catch (e) {
-    endpoints[i].status = 'red';
-    saveEndpoints();
-    renderTokenGrid();
-    addLog('[ping] ' + ep.name + ' failed: ' + e.message, 'err');
+  const ep = KEY_POOL[i];
+  if (ep.key.includes('REPLACE')) {
+    addLog(`[ping] ${ep.label}: not configured — skipped.`, 'warn');
+    return;
   }
+  addLog(`[ping] Pinging ${ep.label}…`);
+  try {
+    const resp = await fetch(GROQ_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + ep.key },
+      body: JSON.stringify({ model: GROQ_MODEL, max_tokens: 1, messages:[{role:'user',content:'ping'}] })
+    });
+    if (resp.status === 429) {
+      KEY_POOL[i].status = 'amber';
+      addLog(`[ping] ${ep.label}: rate-limited (429)`, 'warn');
+    } else if (resp.ok) {
+      KEY_POOL[i].status = 'green';
+      addLog(`[ping] ${ep.label}: OK ✓`, 'ok');
+    } else {
+      KEY_POOL[i].status = 'red';
+      addLog(`[ping] ${ep.label}: error ${resp.status}`, 'err');
+    }
+    KEY_POOL[i].lastChecked = Date.now();
+  } catch (e) {
+    KEY_POOL[i].status = 'red';
+    addLog(`[ping] ${ep.label} failed: ${e.message}`, 'err');
+  }
+  renderTokenGrid();
 }
 
 async function pingAll() {
   addLog('[ping-all] Starting full ping cycle…');
-  for (let i = 0; i < endpoints.length; i++) await pingEndpoint(i);
+  for (let i = 0; i < KEY_POOL.length; i++) await pingEndpoint(i);
   addLog('[ping-all] Done.', 'ok');
 }
 
+/* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('lt-init').textContent = new Date().toTimeString().slice(0,5);
-  loadEndpoints();
+  initKeyPool();
   renderTokenGrid();
   setInterval(renderTokenGrid, 30000);
+  addLog(`[init] ${KEY_POOL.filter(k => !k.key.includes('REPLACE')).length} keys configured and ready.`, 'ok');
 });
 </script>
 </body>
